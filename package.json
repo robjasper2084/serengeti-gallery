@@ -7,10 +7,12 @@
     "dev": "vite --configLoader native --host 0.0.0.0 --port 8205",
     "build": "vite build --configLoader native",
     "preview": "vite preview --configLoader native --host 0.0.0.0 --port 8205",
-    "test": "node --test server/checkout.test.js src/cinema-player.test.js"
+    "test": "node --test server/checkout.test.js src/cinema-player.test.js src/chess-game.test.js src/vr-entry.test.js src/visitor-settings.test.js src/auth-service.test.js"
   },
   "dependencies": {
     "@phosphor-icons/web": "^2.1.2",
+    "@supabase/supabase-js": "2.117.1",
+    "chess.js": "^1.4.0",
     "hls.js": "^1.7.3",
     "stripe": "^22.6.2",
     "three": "^0.180.0",
