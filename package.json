@@ -1,0 +1,22 @@
+{
+  "name": "serengeti-gallery",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite --configLoader native --host 0.0.0.0 --port 8205",
+    "build": "vite build --configLoader native",
+    "preview": "vite preview --configLoader native --host 0.0.0.0 --port 8205",
+    "test": "node --test server/checkout.test.js src/cinema-player.test.js"
+  },
+  "dependencies": {
+    "@phosphor-icons/web": "^2.1.2",
+    "hls.js": "^1.7.3",
+    "stripe": "^22.6.2",
+    "three": "^0.180.0",
+    "vite": "^7.1.0"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "loaderUrl": "/serengeti-gallery/unity/Build/WebGL.loader.js",
+  "config": {
+    "dataUrl": "/serengeti-gallery/unity/Build/WebGL.data",
+    "frameworkUrl": "/serengeti-gallery/unity/Build/WebGL.framework.js",
+    "codeUrl": "/serengeti-gallery/unity/Build/WebGL.wasm",
+    "streamingAssetsUrl": "/serengeti-gallery/unity/StreamingAssets"
+  }
+}
