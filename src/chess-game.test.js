@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {GalleryChessGame} from './chess-game.js';
+test('legal moves and computer response with full-turn undo',()=>{const c=new GalleryChessGame();c.select('e2');c.select('e5');assert.equal(c.game.history().length,0);c.select('e4');c.computer();assert.equal(c.game.history().length,2);assert.equal(c.game.turn(),'w');c.undo();assert.equal(c.game.history().length,0);});
+test('two players and checkmate stop further moves',()=>{const c=new GalleryChessGame();c.reset(2);for(const [a,b] of [['f2','f3'],['e7','e5'],['g2','g4'],['d8','h4']]){c.select(a);c.select(b);}assert.equal(c.game.isCheckmate(),true);assert.match(c.state().status,/checkmated/);c.select('a2');c.select('a3');assert.equal(c.game.history().length,4);});
+test('castling, en passant and queen promotion',()=>{const c=new GalleryChessGame();c.reset(2);c.game.load('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1');c.select('e1');c.select('g1');assert.equal(c.game.get('f1').type,'r');c.game.load('4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1');c.select('e5');c.select('d6');assert.equal(c.game.get('d5'),undefined);c.game.load('4k3/P7/8/8/8/8/8/4K3 w - - 0 1');c.select('a7');c.select('a8');assert.equal(c.game.get('a8').type,'q');});
+
+test('saved game restores moves, mode, castling rights and undo',()=>{const a=new GalleryChessGame();a.reset(2);a.select('e2');a.select('e4');a.select('e7');a.select('e5');const b=new GalleryChessGame();assert.equal(b.restore(JSON.parse(JSON.stringify(a.snapshot()))),true);assert.equal(b.game.fen(),a.game.fen());assert.equal(b.mode,2);b.undo();assert.equal(b.game.history().length,1);});
+test('bad saves do not replace a valid chess game',()=>{const c=new GalleryChessGame();c.select('e2');c.select('e4');const fen=c.game.fen();assert.equal(c.restore({version:1,mode:2,pgn:'not chess'}),false);assert.equal(c.game.fen(),fen);assert.equal(c.restore({version:2,mode:2,pgn:''}),false);});

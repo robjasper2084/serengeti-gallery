@@ -1,9 +1,9 @@
 {
-  "loaderUrl": "/serengeti-gallery/unity/Build/WebGL.loader.js",
+  "loaderUrl": "/serengeti-gallery/unity/Build/WebXR.loader.js",
   "config": {
-    "dataUrl": "/serengeti-gallery/unity/Build/WebGL.data",
-    "frameworkUrl": "/serengeti-gallery/unity/Build/WebGL.framework.js",
-    "codeUrl": "/serengeti-gallery/unity/Build/WebGL.wasm",
+    "dataUrl": "/serengeti-gallery/unity/Build/WebXR.data.unityweb",
+    "frameworkUrl": "/serengeti-gallery/unity/Build/WebXR.framework.js.unityweb",
+    "codeUrl": "/serengeti-gallery/unity/Build/WebXR.wasm.unityweb",
     "streamingAssetsUrl": "/serengeti-gallery/unity/StreamingAssets"
   }
 }
