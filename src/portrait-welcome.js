@@ -1,5 +1,6 @@
 import {projectiveTransform} from './projective-transform.js';
 import {readSaved} from './visitor-settings.js';
+import {LivingPortraitController} from './living-portrait-controller.js';
 // Fit the moving painting to the four inside corners of the existing gold frame.
 // Coordinates are measured in the 1536 × 1024 atrium photograph.
 const corners = [[176,100],[468,177],[460,619],[164,632]];
@@ -12,8 +13,9 @@ export function createPortraitWelcome() {
  const modal=document.querySelector('#modal');
  const loading=document.querySelector('#loading');
  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
- let delayPassed=false;
- let requested=!reducedMotion.matches,finished=false,ready=false,failed=false,sound=false;
+ let delayPassed=true;
+ let requested=false,finished=false,ready=false,failed=false,sound=false;
+ const controller=new LivingPortraitController();controller.transition('invite');
  video.style.transform=projectiveTransform(360,475,corners);
  video.muted=true;
  const caption=document.createElement('div');caption.id='welcome-caption';arrival.append(caption);
@@ -38,6 +40,7 @@ export function createPortraitWelcome() {
   control.setAttribute('aria-pressed',String(playing&&sound));
  }
  function start() {
+  controller.transition('play');
   if(!video.getAttribute('src')){video.src='/serengeti-gallery/assets/portrait-welcome.mp4';video.load();}
   video.play().catch(()=>{requested=false;label();});
  }
@@ -47,14 +50,14 @@ export function createPortraitWelcome() {
   label();
  }
  video.addEventListener('loadeddata',()=>{ready=true;stage.classList.add('ready');sync();});
- video.addEventListener('ended',()=>{finished=true;label();});
+ video.addEventListener('ended',()=>{finished=true;requested=false;stage.classList.remove('ready');controller.transition('complete');window.dispatchEvent(new CustomEvent('serengeti-portrait-complete'));label();});
  video.addEventListener('error',()=>{failed=true;stage.classList.remove('ready');control.hidden=true;});
- const welcomeTimer=setTimeout(()=>{delayPassed=true;sync();},5000);
+ const welcomeTimer=null;
  control.onclick=()=>{
-  if(!sound){document.querySelector('#sound').click();return;}
+  if(!sound){sound=true;video.muted=false;window.dispatchEvent(new CustomEvent('serengeti-portrait-play'));}
   if(!delayPassed){clearTimeout(welcomeTimer);delayPassed=true;requested=false;}
   if(finished){video.currentTime=0;finished=false;requested=true;}else requested=!requested;
-  sync();
+  if(requested){stage.classList.add('ready');controller.transition('play');}else controller.transition('pause');sync();
  };
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});
  new MutationObserver(sync).observe(modal,{attributes:true,attributeFilter:['open']});
@@ -63,9 +66,10 @@ export function createPortraitWelcome() {
  reducedMotion.addEventListener('change',e=>{if(e.matches){requested=false;sync();}});
  sync();
  return {
+  pause(){requested=false;controller.transition('pause');video.pause();label();},
   setSound(enabled){
    sound=enabled;video.muted=!sound;video.volume=1;
-   if(enabled&&visible()) {clearTimeout(welcomeTimer);delayPassed=true;if(ready)video.currentTime=0;finished=false;requested=true;sync();}else label();
+   label();
   }
  };
 }

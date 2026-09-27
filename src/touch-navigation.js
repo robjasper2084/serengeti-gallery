@@ -1,0 +1,15 @@
+export function joystickVector(dx,dy,radius=54){const length=Math.hypot(dx,dy),scale=length>radius?radius/length:1;const x=dx*scale/radius,y=-dy*scale/radius;return {x:Math.abs(x)<.08?0:x,y:Math.abs(y)<.08?0:y,px:dx*scale,py:dy*scale};}
+export function attachTouchNavigation({canvas,send,resume}){
+ const zone=document.createElement('div');zone.id='joystick-zone';zone.setAttribute('aria-label','Drag here to move. Use WASD or arrow keys on a keyboard.');zone.innerHTML='<div class="joystick-base"><span class="joystick-knob"></span></div><span class="joystick-label">DRAG TO MOVE</span>';document.body.append(zone);
+ const base=zone.querySelector('.joystick-base'),knob=zone.querySelector('.joystick-knob');let pointer=null,origin={x:0,y:0},look=null;
+ function stop(){pointer=null;zone.classList.remove('active');base.style.left='50%';base.style.top='50%';knob.style.transform='translate(-50%,-50%)';send('SetJoystick','0,0');}
+ zone.addEventListener('pointerdown',e=>{if(pointer!==null)return;e.preventDefault();e.stopPropagation();canvas.focus();resume();pointer=e.pointerId;origin={x:e.clientX,y:e.clientY};const rect=zone.getBoundingClientRect();base.style.left=(e.clientX-rect.left)+'px';base.style.top=(e.clientY-rect.top)+'px';zone.classList.add('active');zone.setPointerCapture(pointer);});
+ zone.addEventListener('pointermove',e=>{if(e.pointerId!==pointer)return;e.preventDefault();const v=joystickVector(e.clientX-origin.x,e.clientY-origin.y);knob.style.transform=`translate(calc(-50% + ${v.px}px),calc(-50% + ${v.py}px))`;send('SetJoystick',`${v.x.toFixed(3)},${v.y.toFixed(3)}`);});
+ for(const name of ['pointerup','pointercancel','lostpointercapture'])zone.addEventListener(name,e=>{if(e.pointerId===pointer)stop();});
+ canvas.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'||look)return;look={id:e.pointerId,x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
+ canvas.addEventListener('pointermove',e=>{if(!look||look.id!==e.pointerId)return;send('LookTouch',`${e.clientX-look.x},${e.clientY-look.y}`);look.x=e.clientX;look.y=e.clientY;});
+ for(const name of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(name,e=>{if(look?.id===e.pointerId)look=null;});
+ const clear=()=>{stop();look=null;};window.addEventListener('blur',clear);document.addEventListener('visibilitychange',()=>{if(document.hidden)clear();});
+ new MutationObserver(()=>{if(document.querySelector('#modal').open)clear();}).observe(document.querySelector('#modal'),{attributes:true,attributeFilter:['open']});
+ new MutationObserver(()=>{if(!document.body.classList.contains('exploring')||document.body.classList.contains('chess-active')||document.body.classList.contains('piano-active')||document.body.classList.contains('xr-active'))clear();}).observe(document.body,{attributes:true,attributeFilter:['class']});
+}

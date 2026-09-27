@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {joystickVector} from './touch-navigation.js';
+test('floating joystick clamps diagonals and applies a center dead zone',()=>{assert.deepEqual(joystickVector(0,0),{x:0,y:0,px:0,py:0});const v=joystickVector(200,-200);assert.ok(Math.abs(Math.hypot(v.x,v.y)-1)<.0001);assert.ok(v.x>0&&v.y>0);assert.equal(joystickVector(2,1).x,0);assert.equal(joystickVector(0,54).y,-1);});

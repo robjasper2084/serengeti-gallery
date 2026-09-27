@@ -1,3 +1,4 @@
+import {attachTouchNavigation} from './touch-navigation.js';
 import {readSaved,qualityProfile} from './visitor-settings.js';
 import {attachPiano} from './piano.js';
 import {attachChess} from './chess-game.js';
@@ -16,6 +17,11 @@ export async function createUnityGallery({artworks,onArt,onRoom,toast}) {
  attachChess(instance);
  const piano=attachPiano(instance);
  const cinema=createCinemaPlayer();
+ const seats=document.createElement('div');seats.className='cinema-seat-picker';
+ seats.innerHTML='<label for="cinema-seat">Choose your chair</label><select id="cinema-seat">'+Array.from({length:12},(_,i)=>`<option value="${i}">Row ${Math.floor(i/4)+1} · Chair ${i%4+1}</option>`).join('')+'</select><div><button id="cinema-sit">Walk to seat</button><button id="cinema-stand">Stand up</button></div><small>You can also click a chair. Press E or Space to stand.</small>';
+ document.querySelector('#cinema').append(seats);
+ seats.querySelector('#cinema-sit').onclick=()=>{canvas.focus();instance.SendMessage('Playable portrait visitor','ChooseCinemaSeat',seats.querySelector('select').value);};
+ seats.querySelector('#cinema-stand').onclick=()=>{canvas.focus();instance.SendMessage('Playable portrait visitor','StandCinema','');};
  window.addEventListener('serengeti-xr',e=>{document.body.classList.toggle('xr-active',e.detail===true);document.querySelector('#world').dataset.xr=e.detail?'immersive-vr':'desktop';if(e.detail)cinema.leave();else if(room===2)cinema.enter();});
  const send=(method,value='')=>instance.SendMessage('Playable portrait visitor',method,String(value));
  let room=-1;
@@ -83,5 +89,6 @@ export async function createUnityGallery({artworks,onArt,onRoom,toast}) {
  document.querySelector('#jump-control').onclick=()=>{canvas.focus();resume();send('Jump');};
  document.querySelector('#walk-now').onclick=walk;
  document.querySelector('#camera-control').onclick=()=>{send('ChangeView');canvas.focus();resume();};
+ attachTouchNavigation({canvas,send,resume});
  home();return {go,home,arrive,walk,view:()=>{send('ChangeView');canvas.focus();resume();},stop:()=>send('SetPaused','1'),resume,enterVR:(url)=>{if(!instance.Module?.WebXR?.toggleVR){toast('The headset runtime did not initialize. Refresh and retry.');return;}if(!document.body.classList.contains('exploring'))go(0);instance.SendMessage('Playable portrait visitor','SetFilm',url);instance.Module.WebXR.toggleVR();setTimeout(()=>{if(!document.body.classList.contains('xr-active'))toast('If VR did not open, allow the headset session and press Enter VR again.');},8000);}};
 }

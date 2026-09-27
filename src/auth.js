@@ -1,6 +1,6 @@
 import {createClient} from '@supabase/supabase-js';
 import {createAccountService,accountError} from './auth-service.js';
-export function attachAccounts({modal,close,toast}){
+export function attachAccounts({modal,close,toast,onUser=()=>{}}){
  const $=s=>document.querySelector(s);
  const url=import.meta.env.VITE_SUPABASE_URL,key=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
  let client,service,user=null,recovering=false;
@@ -9,6 +9,7 @@ export function attachAccounts({modal,close,toast}){
   service=createAccountService(client,new URL(import.meta.env.BASE_URL,location.origin).href);
   client.auth.onAuthStateChange((event,session)=>{
    user=session?.user??null;
+   queueMicrotask(()=>onUser(user,client));
    $('#account-nav').textContent=user?'My account':'Sign in';$('#signup-nav').hidden=!!user;
    if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>open('password'));}
    else if(event==='SIGNED_OUT'){recovering=false;}
@@ -17,7 +18,7 @@ export function attachAccounts({modal,close,toast}){
  function open(mode='signin'){
   if(!service){modal('<div class="list-panel"><h2>Accounts are coming soon</h2><p>Sign-up is being connected. You can explore the full gallery without an account.</p></div>');return;}
   if(user&&mode!=='password'){
-   modal('<div class="list-panel account-panel"><div class="caption">YOUR SERENGETI ACCOUNT</div><h2>Welcome back</h2><p id="account-email"></p><p>Discoveries and chess games are saved on this browser. Cloud syncing is not enabled.</p><button class="primary" id="signout">Sign out</button><p role="status" id="account-status"></p></div>');
+   modal('<div class="list-panel account-panel"><div class="caption">YOUR SERENGETI ACCOUNT</div><h2>Welcome back</h2><p id="account-email"></p><p>Saved artworks and passport room visits connect to your account. Chess games and detailed artwork discoveries stay on this browser. If the connection fails, a message will let you know.</p><button class="primary" id="signout">Sign out</button><p role="status" id="account-status"></p></div>');
    $('#account-email').textContent=user.email||'Signed in';
    $('#signout').onclick=async()=>{const button=$('#signout'),status=$('#account-status');button.disabled=true;try{await service.signOut();close();toast('Signed out.');}catch(e){status.textContent=accountError(e);button.disabled=false;}};return;
   }

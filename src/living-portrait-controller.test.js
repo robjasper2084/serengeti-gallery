@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {LivingPortraitController} from './living-portrait-controller.js';
+test('portrait requires invitation and explicit play before a chapter',()=>{const p=new LivingPortraitController();assert.equal(p.transition('play'),'DORMANT');for(const [event,state] of [['invite','INVITED'],['play','STORY_PLAYING'],['pause','INVITED'],['play','STORY_PLAYING'],['complete','CHAPTER_REVEALED'],['dismiss','DORMANT']])assert.equal(p.transition(event),state);});

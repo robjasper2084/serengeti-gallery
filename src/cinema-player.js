@@ -33,7 +33,7 @@ export function createCinemaPlayer() {
   document.querySelector('#screening-link').textContent=source.type==='youtube'?'Open on YouTube ↗':'Open source ↗';
   if(source.type==='youtube') {
    iframe=document.createElement('iframe');iframe.title=label;iframe.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';iframe.allowFullscreen=true;iframe.referrerPolicy='strict-origin-when-cross-origin';
-   iframe.src=`${ytOrigin}/embed/${source.id}?enablejsapi=1&origin=${encodeURIComponent(location.origin)}&autoplay=1&mute=${sound?0:1}&rel=0&playsinline=1`;
+   iframe.src=`${ytOrigin}/embed/${source.id}?enablejsapi=1&origin=${encodeURIComponent(location.origin)}&autoplay=0&mute=${sound?0:1}&rel=0&playsinline=1`;
    loadTimer=setTimeout(()=>{if(token!==generation)return;status.textContent='YouTube has not loaded. Under Screenings & streams, try Gallery film or Open on YouTube.';},15000);
    iframe.addEventListener('load',()=>{if(token!==generation)return;clearTimeout(loadTimer);status.textContent='Press play on the screen to begin.';iframe.contentWindow.postMessage(JSON.stringify({event:'listening',id:'serengeti-screen'}),ytOrigin);command('addEventListener',['onStateChange']);command('addEventListener',['onError']);command(sound?'unMute':'mute');});surface.append(iframe);
   }else {
@@ -46,7 +46,7 @@ export function createCinemaPlayer() {
     if(!Hls.isSupported()){status.textContent='This browser cannot play this HLS stream.';return;}
     hls=new Hls();hls.on(Hls.Events.ERROR,(_event,data)=>{if(data.fatal){status.textContent='The stream is unavailable or the host blocks playback here.';hls?.destroy();hls=null;}});hls.loadSource(source.url);hls.attachMedia(video);
    }else video.src=source.url;
-   video.play().catch(()=>{if(token===generation)status.textContent='Press play on the screen to start.';});
+   status.textContent='Ready · press Play to begin.';
   }
  }
  window.serengetiProjectScreen=(points,visible)=>{
@@ -63,6 +63,7 @@ export function createCinemaPlayer() {
   const state=data.event==='onStateChange'?data.info:data.event==='infoDelivery'?data.info?.playerState:undefined;
   if(state===1)status.textContent='Screening playing';else if(state===2)status.textContent='Paused';else if(state===0)status.textContent='Screening ended · Restart to watch again';
  });
+ document.querySelector('#watch-trailer').onclick=()=>load('/serengeti-gallery/assets/detroit-after-dark-web.mp4','Detroit After Dark');
  document.querySelector('#watch-jazz').onclick=()=>load('https://www.youtube.com/watch?v=4euNaGauB5k','Jazz-Off Detroit');
  document.querySelector('#watch-gallery-film').onclick=()=>load('/serengeti-gallery/assets/serengeti-loop.mp4','Between concrete & grass');
  document.querySelector('#screening-form').onsubmit=event=>{event.preventDefault();load(document.querySelector('#screening-url').value,'Your screening');};
