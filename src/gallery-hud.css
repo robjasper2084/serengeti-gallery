@@ -82,3 +82,7 @@
  #gallery-activities{bottom:12px;max-height:calc(100dvh - 80px);width:360px}
  .activities-grid button{min-height:64px;flex-direction:row;font-size:13px}.activities-heading{margin-bottom:8px}.activities-heading h2{font-size:21px}
 }
+@media(max-width:600px){
+ .exploring header .brand strong{white-space:normal;font-size:14px;line-height:1.15;max-width:100%}
+ .exploring header .brand small{display:none}
+}
