@@ -8,6 +8,15 @@ export function attachResponsiveGallery() {
  }
  const trailer=document.querySelector('#cinema-teaser');
  trailer.poster=document.querySelector('#atrium-image').src;
+ // Desktop media stays in the photograph's layer, below its doorway buttons.
+ // Touch layouts give the trailer its own full-width card.
+ const preview=document.querySelector('#cinema-teaser-stage');
+ const touchLayout=matchMedia('(max-width:1100px), (pointer:coarse)');
+ const positionPreview=()=>{
+  if(touchLayout.matches)document.querySelector('#cinema-teaser-controls').before(preview);
+  else document.querySelector('#watch').before(preview);
+ };
+ positionPreview();touchLayout.addEventListener('change',positionPreview);
  const cinemaEnter=document.querySelector('#teaser-enter');
  cinemaEnter.innerHTML='<span class="compact-label">Enter ↗</span><span class="touch-label">Enter cinema ↗</span>';
 
