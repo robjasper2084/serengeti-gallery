@@ -1,0 +1,9 @@
+#arrival .delayed-bubble:not(.bubble-ready):not(:focus-visible) span{opacity:0;visibility:hidden}
+#arrival .delayed-bubble.bubble-ready span{animation:arrival-bubble-pop .42s ease-out both}
+#arrival .delayed-bubble span::after{content:'';position:absolute;left:50%;bottom:-5px;width:9px;height:9px;background:#10100e;border-right:1px solid var(--gold);border-bottom:1px solid var(--gold);transform:translateX(-50%) rotate(45deg)}
+#arrival-quick .delayed-bubble:not(.bubble-ready){visibility:hidden;pointer-events:none}
+#responsive-arrival>#arrival-quick .bubble-ready{border-color:var(--gold);border-radius:24px;animation:arrival-quick-pop .42s ease-out both}
+@keyframes arrival-bubble-pop{0%{transform:translateX(-50%) translateY(10px) scale(.85)}70%{transform:translateX(-50%) translateY(-2px) scale(1.04)}100%{transform:translateX(-50%) translateY(0) scale(1)}}
+@keyframes arrival-quick-pop{0%{transform:translateY(8px) scale(.9)}70%{transform:translateY(-2px) scale(1.04)}100%{transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){#arrival .delayed-bubble.bubble-ready span,#responsive-arrival>#arrival-quick .bubble-ready{animation:none}}
+#arrival .bubble-still.bubble-ready span,#responsive-arrival>#arrival-quick .bubble-still.bubble-ready{animation:none}

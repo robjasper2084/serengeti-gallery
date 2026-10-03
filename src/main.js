@@ -11,6 +11,7 @@ import './gallery-hud.css';
 import './chess.css';
 import './together.css';
 import './first-visit.css';
+import './arrival-bubbles.css';
 import {attachChess} from './chess-game.js';
 import {attachTogether} from './together.js';
 import {attachFirstVisit} from './first-visit.js';

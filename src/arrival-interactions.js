@@ -1,3 +1,6 @@
+import {createArrivalBubbleTimers} from './arrival-bubbles.js';
+import {readSaved} from './visitor-settings.js';
+
 export function attachArrivalInteractions({enterGallery}){
  const arrival=document.querySelector('#arrival'),image=document.querySelector('#atrium-image');
  const entrance=document.createElement('button');entrance.id='arrival-enter';entrance.className='scene-hotspot entrance-hotspot';entrance.setAttribute('aria-label','Walk into the gallery');entrance.innerHTML='<span>Enter gallery ↗</span>';entrance.onclick=enterGallery;arrival.append(entrance);
@@ -19,6 +22,20 @@ export function attachArrivalInteractions({enterGallery}){
  }
  const observer=new ResizeObserver(fit);observer.observe(arrival);if(hero)observer.observe(hero);image.addEventListener('load',fit);fit();
  const quick=document.createElement('nav');quick.id='arrival-quick';quick.setAttribute('aria-label','Explore the scene');
- for(const [text,target]of [['Portrait',portrait],['Enter gallery',entrance],['Cinema',cinema]]){const b=document.createElement('button');b.textContent=text;b.onclick=()=>target.click();quick.append(b);}
+ const bubbles=[];
+ for(const [text,target,delay]of [['Portrait',portrait,15000],['Enter gallery',entrance,0],['Cinema',cinema,16000]]){
+  const b=document.createElement('button');b.textContent=text;b.onclick=()=>target.click();quick.append(b);
+  if(delay){target.classList.add('delayed-bubble');b.classList.add('delayed-bubble');bubbles.push({delay,reveal:()=>{target.classList.add('bubble-ready');b.classList.add('bubble-ready');}});}
+ }
  arrival.append(quick);
+ const motion=matchMedia('(prefers-reduced-motion: reduce)');
+ const updateMotion=()=>{const still=readSaved('serengeti-reduced-motion',motion.matches)===true;for(const target of [portrait,cinema,...quick.querySelectorAll('.delayed-bubble')])target.classList.toggle('bubble-still',still);};
+ updateMotion();motion.addEventListener('change',updateMotion);window.addEventListener('serengeti-motion',updateMotion);
+ const modal=document.querySelector('#modal'),loading=document.querySelector('#loading');
+ const timers=createArrivalBubbleTimers(bubbles,{isVisible:()=>!document.hidden&&!document.body.classList.contains('exploring')&&!modal?.open&&(!loading||loading.classList.contains('hidden'))});
+ document.addEventListener('visibilitychange',timers.sync);
+ const visibilityObserver=new MutationObserver(timers.sync);
+ visibilityObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
+ if(modal)visibilityObserver.observe(modal,{attributes:true,attributeFilter:['open']});
+ if(loading)visibilityObserver.observe(loading,{attributes:true,attributeFilter:['class']});
 }
