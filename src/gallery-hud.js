@@ -36,6 +36,13 @@ export function attachGalleryHUD({modal,pause,resume,onHelp}){
  if(onHelp)help.onclick=onHelp;
  else help.addEventListener('click',()=>{document.querySelector('#help-ready').onclick=()=>document.querySelector('#modal .close').click();});
  back.onclick=()=>$('#home').click();
+ // Direct shortcuts stay on the play HUD; the Activities drawer keeps its options.
+ for(const [id,target,icon,label]of [['hud-play-chess','play-chess','crown','Play chess'],['hud-play-piano','play-piano','piano-keys','Jazz piano']]){
+  const button=document.createElement('button');button.id=id;button.className='room activity-shortcut';
+  button.setAttribute('aria-label',label);
+  button.innerHTML=`<i class="ph-light ph-${icon}" aria-hidden="true"></i><span>${label}</span>`;
+  button.onclick=()=>{close();$('#'+target).click();};$('.visit-actions').append(button);
+ }
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden){event.preventDefault();close(true);}});
  window.addEventListener('serengeti-room',event=>{roomName.textContent=['Atrium','Art gallery','Cinema'][event.detail]||'Welcome!';document.querySelectorAll('.rooms [data-room]').forEach(button=>button.setAttribute('aria-current',Number(button.dataset.room)===event.detail?'location':'false'));close();});
  new MutationObserver(()=>{if(!document.body.classList.contains('exploring'))close();}).observe(document.body,{attributes:true,attributeFilter:['class']});

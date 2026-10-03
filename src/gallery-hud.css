@@ -23,6 +23,7 @@
 .exploring .visit-actions{position:fixed;inset:auto 24px 28px auto;transform:none;display:grid;grid-template-columns:repeat(2,80px);gap:12px;max-width:none;width:auto;align-items:center;z-index:5}
 .exploring .visit-actions button{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-height:72px;width:80px;padding:8px!important;border:1px solid #dcc390a0;border-radius:22px;background:#101511d9;font-size:13px;color:#fff1d4;box-shadow:0 3px 12px #0003}
 .exploring .visit-actions i{font-size:25px}.exploring #camera-control span{display:block;font-size:13px}
+.exploring .visit-actions .activity-shortcut span{display:block;margin:0;font-size:12px;line-height:1.2}
 .exploring .visit-actions #camera-control{grid-column:auto}
 .exploring #run-control:before{content:'⇈';font-size:25px;line-height:1}.exploring #jump-control:before{content:'↑';font-size:25px;line-height:1}
 .exploring #run-control[aria-pressed=true]{background:#d4b47c;color:#172019}
@@ -76,7 +77,7 @@
 @media(max-height:550px) and (min-width:601px){
  .exploring #hint{display:none}.exploring #progress{max-width:185px}
  .exploring #joystick-zone{bottom:60px;height:128px;width:140px}.exploring .joystick-base{width:96px;height:96px}
- .exploring .visit-actions{bottom:64px;grid-template-columns:repeat(2,60px);gap:8px}
+ .exploring .visit-actions{bottom:64px;grid-template-columns:repeat(3,60px);gap:8px}
  .exploring .visit-actions button{width:60px;min-height:60px}
  .exploring.at-entrance #walk-now{bottom:80px;max-width:230px}
  #gallery-activities{bottom:12px;max-height:calc(100dvh - 80px);width:360px}
@@ -85,4 +86,8 @@
 @media(max-width:600px){
  .exploring header .brand strong{white-space:normal;font-size:14px;line-height:1.15;max-width:100%}
  .exploring header .brand small{display:none}
+}
+@media(max-width:600px) and (max-height:550px){
+ .exploring .visit-actions{grid-template-columns:repeat(2,56px);gap:6px}
+ .exploring .visit-actions button{width:56px;min-height:56px;font-size:11px}
 }
