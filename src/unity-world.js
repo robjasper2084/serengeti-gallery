@@ -15,7 +15,7 @@ export async function createUnityGallery({artworks,onArt,onRoom,toast,chess,onPr
  instance.SendMessage('Playable portrait visitor','SetCatalog',JSON.stringify({items:artworks.map((a,index)=>({index,title:a.title,artist:a.subtitle,description:a.description,note:a.note}))}));
  window.addEventListener('serengeti-quality',e=>{const p=qualityProfile(e.detail,matchMedia('(pointer: coarse)').matches);instance.Module.devicePixelRatio=Math.min(devicePixelRatio,p.ratio);instance.SendMessage('Playable portrait visitor','SetQuality',p.mode);});
  window.addEventListener('serengeti-vr-art',e=>{const index=Number(e.detail);const saved=readSaved('serengeti-discoveries',[]);const visits=new Set(Array.isArray(saved)?saved:[]);visits.add(index);try{localStorage.setItem('serengeti-discoveries',JSON.stringify([...visits]));}catch{}window.dispatchEvent(new CustomEvent('serengeti-discovered',{detail:index}));});
- chess.setInstance(instance);
+ chess.setInstance(instance,()=>{if(room!==0)go(0);instance.SendMessage('Gallery chess','Choose','focus');});
  const piano=attachPiano(instance);
  const cinema=createCinemaPlayer();
  const seats=document.createElement('div');seats.className='cinema-seat-picker';
@@ -31,14 +31,15 @@ export async function createUnityGallery({artworks,onArt,onRoom,toast,chess,onPr
  document.body.classList.add('unity-ready');document.querySelector('#loading').classList.add('hidden');
  canvas.dataset.renderer='Unity WebGL';canvas.dataset.artworks='33';canvas.dataset.character='Circuit Suit curator';
  window.addEventListener('serengeti-art',e=>onArt(Number(e.detail)));
- window.addEventListener('serengeti-sound',e=>cinema.setSound(e.detail));
+ const cinemaSound=()=>cinema.setSound(document.querySelector('#sound').dataset.enabled==='true'&&document.querySelector('#sound').dataset.source==='cinema'&&!document.hidden);
+ window.addEventListener('serengeti-sound',cinemaSound);
  window.addEventListener('serengeti-motion',e=>send('SetMotion',e.detail?'0':'1'));
  send('SetMotion',readSaved('serengeti-reduced-motion',matchMedia('(prefers-reduced-motion: reduce)').matches)?'0':'1');
  function updateRoom(n){
   if(room!==n){
    if(n!==0)piano.leave();
    room=n;document.body.classList.toggle('cinema-active',n===2);
-   if(n===2){cinema.enter();cinema.setSound(document.querySelector('#sound span').textContent==='Sound On');}else cinema.leave();
+   if(n===2){cinema.enter();cinemaSound();}else cinema.leave();
    window.dispatchEvent(new CustomEvent('serengeti-room',{detail:n}));
   }
   onRoom(n);

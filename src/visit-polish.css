@@ -1,0 +1,67 @@
+/* Keep the photographic arrival, with one clear invitation and shared sound controls. */
+.hero .arrival-description{font-size:14px;line-height:1.55;letter-spacing:0;color:#e1d4bc;max-width:32ch;margin-top:12px}
+.hero #discover-story{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;max-width:300px;min-height:56px;height:auto;background:#d4b47c;border-color:#e4c791;color:#192019;font-weight:600;font-size:17px;border-radius:10px;box-shadow:0 4px 18px #0003}
+.hero #discover-story:hover{background:#ebcf9b}
+.hero #discover-story:after{content:'↗';font-size:22px}
+.hero .lobby-options{margin-bottom:0}
+.bottom #sound{gap:10px;min-width:158px;min-height:48px}
+.sound-copy{display:grid;gap:3px;text-align:left}
+.sound-copy strong{font-size:13px;font-weight:500}.sound-copy small{font-size:10px;line-height:1.2;letter-spacing:0;color:#d4bca0;white-space:normal}
+#cinema-teaser-controls #teaser-mute{display:none}
+#cinema-teaser-controls .sound-note{font-size:11px;color:#d4bca0;margin:10px 0}
+.film-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.film-toolbar button{min-height:48px;padding:12px;border:1px solid var(--line);border-radius:8px}
+#home-film{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:16/9;max-height:60dvh;object-fit:contain;background:#000;border-radius:8px}
+#together-launch{display:flex!important;align-items:center;gap:7px;min-width:104px!important;width:auto!important;padding:0 10px!important;border:1px solid #d4b47c66;border-radius:12px;font-size:13px}
+#together-launch i{font-size:23px}.friend-label{display:inline}.friend-online{font-size:11px;color:#e8c48b}.friend-online:empty{display:none}.friend-count{right:-4px;top:-4px;min-width:18px;line-height:12px}
+#together-panel #create-room{background:#d4b47c;color:#172019;font-weight:600;border-color:#e0c693}
+.visitor-presence{font-size:12px;line-height:1.5;color:#d3c19f;margin:8px 0 16px;padding:10px;border:1px solid #d4b47c33;border-radius:8px}
+.invite-copy{flex-wrap:wrap}.invite-copy input{flex:1;min-width:0}.invite-copy button{min-width:70px}
+#piano-controls [data-gallery-sound]{min-height:48px;padding:8px 12px;border:1px solid var(--line);border-radius:8px}
+/* The room and seated curator stay visible behind chess. Keep contrast on the controls. */
+.chess-active #progress{display:none}
+body.exploring.chess-active #chess-controls,body.exploring.chess-active #chess-controls:has(details[open]){background:rgb(12 24 17 / 12%);box-shadow:none;backdrop-filter:none;border-color:#d4b47c88}
+.exploring #chess-controls .chess-heading h2{padding:8px 12px;border-radius:9px;background:#101811d9}
+.exploring #chess-controls .chess-heading button{background:#101811e8}
+.exploring #chess-controls .chess-options{flex:0 1 340px;padding:14px;background:#101811db;border:1px solid #d4b47c66;border-radius:12px}
+.exploring #chess-controls .accessible-chess{box-shadow:0 3px 18px #0006}
+#chess-controls .chess-layout{flex-wrap:nowrap}
+/* Dock the board beside the table instead of covering the seated curator. */
+@media(min-width:901px) and (min-height:601px){
+ body.exploring.chess-active #chess-controls{inset:calc(var(--gallery-header,80px) + 8px) auto 16px 16px;margin:0;width:min(450px,40vw)}
+ .exploring #chess-controls .chess-layout{flex-direction:column;gap:12px}
+ .exploring #chess-controls .accessible-chess{width:min(100%,calc(100dvh - var(--gallery-header,80px) - 300px));max-width:100%}
+ .exploring #chess-controls .chess-options{width:100%;flex:1;min-height:0;padding:10px}
+ .exploring #chess-controls .chess-status{margin-bottom:6px!important}
+ .exploring #chess-controls .chess-instructions{margin:6px 0}
+}
+@media(min-width:1101px) and (min-aspect-ratio:1/1){header .header-tools{gap:20px}header .outline{margin-right:12px;min-width:130px;gap:12px}.hero{padding:24px 28px;width:430px}.hero .round-button{top:30px;right:24px}.hero h1{max-width:calc(100% - 48px);font-size:33px}}
+@media(max-width:1100px),(pointer:coarse),(max-aspect-ratio:1/1){
+ #responsive-arrival .hero .arrival-description{font-size:14px;letter-spacing:0;line-height:1.55;margin-top:10px}
+ #responsive-arrival .hero #discover-story{max-width:none;min-height:56px;margin-top:14px}
+ #responsive-arrival #cinema-teaser-controls .teaser-actions{grid-template-columns:48px minmax(0,1fr)}
+ #responsive-arrival #cinema-teaser-controls .teaser-actions:after{content:'Trailer preview · use the shared sound button';font-size:12px;line-height:1.5;color:#d4bca0;align-self:center}
+ .bottom #sound{min-width:0;gap:8px}.bottom .sound-copy strong{font-size:12px}.bottom .sound-copy small{font-size:10px}
+ header .header-tools #together-launch{min-width:90px!important;font-size:12px;height:48px}
+ header #search-nav{display:none}
+ .exploring header .brand strong{white-space:normal;font-size:clamp(13px,2vw,24px)}
+}
+@media(max-width:600px){
+ .exploring #chess-controls .chess-options{background:#10181160;text-shadow:0 1px 3px #000,0 0 6px #000}
+ header .header-tools{gap:4px!important}header .header-tools #together-launch{min-width:82px!important;padding:0 8px!important;gap:5px}
+ header .brand strong{white-space:normal;font-size:clamp(14px,3.7vw,20px);line-height:1.15}header .brand small{display:none}
+ .exploring header{grid-template-columns:minmax(0,1fr) auto auto;gap:0 4px}.exploring header .header-tools #together-launch{min-width:48px!important;width:48px!important;padding:0!important;justify-content:center}.exploring .friend-label,.exploring .friend-online{display:none}
+ .piano-footer{flex-wrap:wrap}.piano-footer small{max-width:100%;flex-basis:100%}.piano-footer button{flex:1}
+}
+@media(max-height:550px) and (min-width:601px){header .header-tools #together-launch{min-width:86px!important;padding:0 8px!important}header .brand strong{font-size:16px}.hero .arrival-description{margin-top:5px;font-size:13px}}
+@media(max-height:500px){
+ /* The board takes priority on a short screen; Close chess returns to navigation. */
+ body.chess-active{--gallery-header:0px}
+ body.chess-active header{display:none!important}
+ body.chess-active #chess-controls{inset:max(4px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));padding:6px;gap:4px}
+ body.chess-active #chess-controls .chess-heading button{width:44px;min-height:44px}
+ body.chess-active #chess-controls .accessible-chess{width:min(55%,calc(100dvh - 70px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}
+ body.chess-active #chess-controls .accessible-chess button[data-square]{font-size:clamp(18px,7vh,32px)}
+ .exploring #chess-controls .chess-heading h2{font-size:18px;padding:6px 10px}
+ .chess-active .bottom{display:none}
+}

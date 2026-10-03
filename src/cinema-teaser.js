@@ -13,7 +13,8 @@ export function createCinemaTeaser({enterCinema}){
  panel.innerHTML='<div class="caption">NOW PREVIEWING · 15 SECONDS</div><h2>Detroit After Dark</h2><div class="teaser-actions"><button id="teaser-play" aria-pressed="false">▶ Play trailer</button><button id="teaser-mute" aria-label="Turn trailer sound on" aria-pressed="false">Sound off</button></div><button id="teaser-enter">Enter cinema ↗</button><p id="teaser-status" role="status">Art. Jazz. Detroit.</p>';
  arrival.append(panel);
  const play=panel.querySelector('#teaser-play'),mute=panel.querySelector('#teaser-mute'),status=panel.querySelector('#teaser-status');
- let requested=!reduced(),userPaused=false;
+ const saveData=()=>navigator.connection?.saveData||['slow-2g','2g'].includes(navigator.connection?.effectiveType);
+ let requested=!reduced()&&!saveData(),userPaused=false;
  let inView=typeof IntersectionObserver==='undefined';
  const visible=()=>inView&&!document.hidden&&!document.body.classList.contains('exploring')&&!document.querySelector('#modal').open;
  function fit(){const {width,height}=arrival.getBoundingClientRect(),scale=Math.max(width/1536,height/1024);const [px,py]=getComputedStyle(image).objectPosition.split(' ').map(n=>parseFloat(n)/100);stage.style.transform=`translate(${(width-1536*scale)*px}px,${(height-1024*scale)*py}px) scale(${scale})`;panel.classList.toggle('compact-preview',width<700);}
@@ -25,8 +26,8 @@ export function createCinemaTeaser({enterCinema}){
   if(!video.muted)window.dispatchEvent(new CustomEvent('serengeti-teaser-play'));
   try{await video.play();}catch{status.textContent='Tap Play trailer to try again.';requested=false;label();}
  }
- play.onclick=()=>{userPaused=!video.paused;if(video.paused){video.muted=false;window.dispatchEvent(new CustomEvent('serengeti-audio-request',{detail:true}));start();}else pause();};
- mute.onclick=()=>{video.muted=!video.muted;window.dispatchEvent(new CustomEvent('serengeti-audio-request',{detail:!video.muted}));if(!video.muted)window.dispatchEvent(new CustomEvent('serengeti-teaser-play'));label();};
+ play.onclick=()=>{userPaused=!video.paused;if(video.paused){window.dispatchEvent(new CustomEvent('serengeti-audio-request',{detail:{enabled:true,source:'trailer'}}));video.muted=false;start();}else pause();};
+ mute.onclick=()=>{const enabled=video.muted;window.dispatchEvent(new CustomEvent('serengeti-audio-request',{detail:{enabled,source:'trailer'}}));video.muted=!enabled;if(enabled)window.dispatchEvent(new CustomEvent('serengeti-teaser-play'));label();};
  panel.querySelector('#teaser-enter').onclick=()=>{video.pause();enterCinema();};
  panel.querySelector('#teaser-enter').textContent='Enter ↗';
  panel.querySelector('#teaser-enter').setAttribute('aria-label','Enter cinema');
@@ -36,7 +37,7 @@ export function createCinemaTeaser({enterCinema}){
  video.addEventListener('pause',label);video.addEventListener('ended',()=>{requested=false;status.textContent='Step inside for films, streams & jazz.';label();});
  video.addEventListener('error',()=>{stage.classList.remove('ready');status.textContent='Trailer unavailable. You can still enter the cinema.';pause();});
  const sync=()=>{if(!visible())video.pause();else if(requested&&video.paused)start();};
- const updateMotion=()=>{video.autoplay=false;if(reduced())pause();else if(!userPaused){requested=true;video.muted=true;sync();}};
+ const updateMotion=()=>{video.autoplay=false;if(reduced()||saveData())pause();else if(!userPaused){requested=true;video.muted=true;sync();}};
  motion.addEventListener('change',updateMotion);window.addEventListener('serengeti-motion',updateMotion);
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});new MutationObserver(sync).observe(document.querySelector('#modal'),{attributes:true,attributeFilter:['open']});document.addEventListener('visibilitychange',sync);
  document.querySelector('#portrait-welcome').addEventListener('play',()=>{video.muted=true;label();});

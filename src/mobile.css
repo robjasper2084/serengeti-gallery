@@ -7,7 +7,7 @@
 :root{--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 .xr-active #cinema-controls-toggle{display:none!important}
 
-@media(max-width:1100px),(pointer:coarse){
+@media(max-width:1100px),(pointer:coarse),(max-aspect-ratio:1/1){
  :root{--gallery-header:calc(112px + var(--safe-top));--gallery-footer:calc(64px + var(--safe-bottom))}
  html,body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
  #app{height:100%;min-height:0}
@@ -105,7 +105,7 @@
  .list-panel,.modal-copy{padding:56px 20px 24px}
 }
 
-@media(min-width:701px) and (max-width:1100px),(min-width:701px) and (pointer:coarse){
+@media(min-width:701px) and (max-width:1100px),(min-width:701px) and (pointer:coarse),(min-width:701px) and (max-aspect-ratio:1/1){
  #responsive-arrival{padding:24px max(24px,var(--safe-right)) 32px max(24px,var(--safe-left));grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);grid-template-areas:'scene intro' 'scene quick' 'scene portrait' 'captions captions' 'preview trailer';gap:20px 24px;align-items:start}
  #responsive-arrival>#arrival{grid-area:scene}
  #responsive-arrival>.hero{grid-area:intro}

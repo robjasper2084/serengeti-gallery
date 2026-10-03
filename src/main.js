@@ -12,7 +12,9 @@ import './chess.css';
 import './together.css';
 import './first-visit.css';
 import './arrival-bubbles.css';
-import {attachChess} from './chess-game.js';
+import './visit-polish.css';
+import {attachLazyChess} from './lazy-chess.js';
+import {attachGalleryAudio} from './gallery-audio.js';
 import {attachTogether} from './together.js';
 import {attachFirstVisit} from './first-visit.js';
 import {attachGalleryHUD} from './gallery-hud.js';
@@ -25,7 +27,7 @@ const $=s=>document.querySelector(s);
 $('#app').innerHTML=`<canvas id="world" aria-label="Interactive Serengeti Gallery. Use W A S D or arrow keys to walk, drag to look, or choose the movement controls."></canvas><div id="shade"></div>
 <div id="arrival"><img id="atrium-image" src="/serengeti-gallery/assets/atrium-cinematic.webp" width="1536" height="1024" fetchpriority="high" decoding="async" alt="A monumental portrait, a lush tree, and a warmly lit cinema inside Serengeti Gallery’s Detroit atrium."><div id="portrait-stage" aria-hidden="true"><video id="portrait-welcome" muted playsinline preload="none"></video></div><button class="scene-hotspot portrait-hotspot" id="portrait-info" aria-label="Discover the living portrait"><span>Discover the portrait</span></button><button class="scene-hotspot cinema-hotspot" id="watch" aria-label="Visit the cinema"><span>Enter the cinema</span></button></div>
 <header><button class="brand" id="home" aria-label="Serengeti Gallery home"><strong>SERENGETI GALLERY</strong><small>DETROIT</small></button><nav aria-label="Main navigation"><button id="explore-nav" class="active">Gallery</button><button id="cinema-nav">Cinema</button><button id="collection-nav">Collection</button></nav><div class="header-tools"><button id="vr" class="outline">Enter VR <i class="ph-light ph-goggles" aria-hidden="true"></i></button><button class="icon-button" id="search-nav" aria-label="Search the collection"><i class="ph-light ph-magnifying-glass" aria-hidden="true"></i></button><button class="icon-button" id="menu-nav" aria-label="Open menu" aria-expanded="false"><i class="ph-light ph-list" aria-hidden="true"></i></button></div></header>
-<main class="hero"><h1>The Living Portrait</h1><p>A JOURNEY THROUGH TIME,<br>CULTURE AND CREATIVITY.</p><button id="portrait-next" class="round-button" aria-label="Read the portrait story"><i class="ph-light ph-caret-right" aria-hidden="true"></i></button><button class="primary" id="discover-story">Enter gallery</button></main>
+<main class="hero"><h1>The Living Portrait</h1><p class="arrival-description">Explore art, watch films, and meet friends. Make yourself at home.</p><button id="portrait-next" class="round-button" aria-label="Read the portrait story"><i class="ph-light ph-caret-right" aria-hidden="true"></i></button><button class="primary" id="discover-story">Enter gallery</button></main>
 <div id="progress">THE LIVING PORTRAIT &nbsp; <span id="visited">0 / 33 works discovered</span></div><div id="hint">Drag joystick to move · Swipe the room to look · WASD / Shift / Space on keyboard</div><div id="mobile-nav" role="group" aria-label="Walk and look controls"><button id="turn-left" aria-label="Look left"><i class="ph-light ph-arrow-counter-clockwise" aria-hidden="true"></i></button><button id="forward" aria-label="Move forward"><i class="ph-light ph-arrow-up" aria-hidden="true"></i></button><button id="backward" aria-label="Move backward"><i class="ph-light ph-arrow-down" aria-hidden="true"></i></button><button id="turn-right" aria-label="Look right"><i class="ph-light ph-arrow-clockwise" aria-hidden="true"></i></button></div>
 <div class="visit-actions"><button id="walk-now" class="primary">Walk with the curator <i class="ph-light ph-arrow-up-right" aria-hidden="true"></i></button><button id="run-control" class="room" aria-pressed="false">Run</button><button id="jump-control" class="room">Jump</button><button id="teleport-control" class="room">Teleport</button><button id="play-piano" class="room">Jazz piano</button><button id="play-chess" class="room">Play chess</button><button id="camera-control" class="room" aria-label="Switch character or first-person view"><i class="ph-light ph-person-simple-walk" aria-hidden="true"></i><span>Camera view</span></button></div><div class="rooms"><button class="room selected" data-room="0"><span>01</span>Atrium</button><button class="room" data-room="1"><span>02</span>Collection</button><button class="room" data-room="2"><span>03</span>Cinema</button></div>
 <button id="welcome-control" class="welcome-control" aria-label="Pause the portrait welcome" aria-pressed="true"><i class="ph-light ph-pause" aria-hidden="true"></i><span>Pause welcome</span></button><div class="bottom"><button id="map-nav"><i class="ph-light ph-map-trifold" aria-hidden="true"></i><span>Map</span></button><button class="sound" id="sound"><i class="ph-light ph-speaker-high" aria-hidden="true"></i><span>Sound Off</span></button></div>
@@ -93,7 +95,7 @@ async function getWorld(){
 }
 function visit(action){const intent=++visitIntent;chess.leave();return getWorld().then(w=>{if(intent!==visitIntent)return;action(w);tutorial.first();}).catch(()=>{});}
 const world={go:n=>visit(w=>w.go(n)),arrive:()=>visit(w=>w.arrive()),home:()=>{++visitIntent;$('#loading').classList.add('hidden');chess.leave();runtime?.home();$('#menu').classList.add('hidden');$('#menu-nav').setAttribute('aria-expanded','false');onRoom(-1);},stop:()=>runtime?.stop(),view:()=>runtime?runtime.view():toast('Enter the gallery to change the camera view.'),enterVR:()=>prepareVR()};
-const chess=attachChess({onOnline:()=>together.open(),onOpen:()=>{if($('#modal').open)close();world.stop();},onClose:()=>runtime?.resume()});
+const chess=attachLazyChess({onOnline:()=>together.open(),onOpen:()=>{if($('#modal').open)close();world.stop();},onClose:()=>runtime?.resume()},{onLoading:toast});
 const together=attachTogether({chess,pause:()=>world.stop(),resume:()=>runtime?.resume(),toast});
 const tutorial=attachFirstVisit({modal,close,onFinish:()=>document.body.classList.contains('at-entrance')?runtime?.walk():runtime?.resume()});
 $('#loading').innerHTML='<strong>Enter Serengeti</strong><small>PREPARING THE 3D GALLERY</small><progress id="gallery-load-progress" max="1" value="0" aria-label="3D gallery loading"></progress><p>The first 3D visit downloads about 61 MB. Browse art or play chess without loading 3D.</p><button id="load-low">Use low detail</button><button id="load-browse">Browse art instead</button>';
@@ -106,16 +108,8 @@ document.querySelectorAll('[data-room]').forEach(b=>b.onclick=()=>world.go(Numbe
 $('#menu-nav').onclick=()=>{const hidden=$('#menu').classList.toggle('hidden');$('#menu-nav').setAttribute('aria-expanded',String(!hidden));hidden?runtime?.resume():world.stop();};
 for(const [id,text,action] of [['browse-nav','Browse artworks',()=>collection()],['passport-nav','My passport & saved art',showPassport],['tour-nav','Take a guided tour',guidedTour]]){const button=document.createElement('button');button.id=id;button.textContent=text;button.onclick=action;$('#account-nav').before(button);}
 window.addEventListener('serengeti-portrait-complete',()=>recordProgress('chapter','welcome'));
-attachHTMLCinema({modal});
-let audioCtx=null,audioTimer=null;
-$('#sound').onclick=()=>{if($('#sound span').textContent==='Sound On'){audioCtx?.suspend();clearInterval(audioTimer);$('#sound span').textContent='Sound Off';portraitWelcome.setSound(false);window.dispatchEvent(new CustomEvent('serengeti-sound',{detail:false}));return;}audioCtx??=new AudioContext();audioCtx.resume();const chords=[[146.83,174.61,220,261.63],[130.81,164.81,196,246.94],[110,146.83,174.61,220],[123.47,155.56,196,233.08]];let beat=0;function phrase(){chords[beat++%4].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;const t=audioCtx.currentTime+i*.09;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.025,t+.04);g.gain.exponentialRampToValueAtTime(.001,t+2.7);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+2.8);});}phrase();audioTimer=setInterval(phrase,2400);$('#sound span').textContent='Sound On';portraitWelcome.setSound(true);window.dispatchEvent(new CustomEvent('serengeti-sound',{detail:true}));if(document.body.classList.contains('cinema-active')){clearInterval(audioTimer);audioCtx.suspend();}};
-
-
-
-// The reference-matching homepage stays visible until the visitor enters Unity.
-
-
-window.addEventListener('serengeti-room',e=>{if(e.detail===2){clearInterval(audioTimer);audioCtx?.suspend();}});
+const htmlCinema=attachHTMLCinema({modal});
+const galleryAudio=attachGalleryAudio();
 
 async function prepareVR(){
  const capability=await checkHeadset();if(!capability.supported){modal('<div class="list-panel"><h2>Open Serengeti in your headset</h2><p>'+escape(capability.message)+'</p><p>VR covers the gallery and native cinema. YouTube embeds remain available in the standard browser player.</p></div>');return;}
@@ -131,19 +125,26 @@ $('#settings-nav').onclick=()=>{modal(`<div class="list-panel"><h2>Make yourself
 
 window.addEventListener('serengeti-discovered',e=>{const i=Number(e.detail);if(Number.isInteger(i)&&i>=0&&i<artworks.length){encounters.add(i);writeSaved('serengeti-discoveries',[...encounters]);$('#visited').textContent=`${encounters.size} / ${artworks.length} works discovered`;}});
 
-import('./auth.js').then(({attachAccounts})=>attachAccounts({modal,close,toast,onUser:accountChanged})).catch(()=>toast('Accounts could not load. Please refresh to retry.'));
+// Guest arrivals do not download the account client until it is needed.
+let accountPromise=null;
+function loadAccounts(){
+ accountPromise??=import('./auth.js').then(({attachAccounts})=>attachAccounts({modal,close,toast,onUser:accountChanged})).catch(()=>{accountPromise=null;toast('Accounts could not load. Please try again.');return null;});
+ return accountPromise;
+}
+for(const id of ['account-nav','signup-nav'])$('#'+id).onclick=async()=>{if(await loadAccounts())$('#'+id).click();};
+$('#menu-nav').addEventListener('click',()=>loadAccounts());
+let savedAccount=false;try{for(let i=0;i<localStorage.length;i++)if(/^sb-.+-auth-token$/.test(localStorage.key(i)))savedAccount=true;}catch{}
+if(savedAccount||/[#&](access_token|error|type)=|[?&]code=/.test(location.href))loadAccounts();
 
-createCinemaTeaser({enterCinema:()=>world.go(2)});
+function openCinema(){
+ if(document.body.classList.contains('exploring')){world.go(2);return;}
+ modal('<div class="list-panel"><div class="caption">YOUR CINEMA VISIT</div><h2>How would you like to watch?</h2><p>Watch a film right away, or walk into the 3D cinema with the curator.</p><div class="map-destinations"><button id="cinema-watch-now"><i class="ph-light ph-play" aria-hidden="true"></i><span><strong>Watch a film</strong><small>Quick to open · no 3D download</small></span></button><button id="cinema-explore"><i class="ph-light ph-person-simple-walk" aria-hidden="true"></i><span><strong>Enter the 3D cinema</strong><small>Choose a chair and explore</small></span></button></div></div>');
+ $('#cinema-watch-now').onclick=()=>htmlCinema.open();$('#cinema-explore').onclick=()=>{close();world.go(2);};
+}
+$('#watch').onclick=$('#cinema-nav').onclick=openCinema;
+createCinemaTeaser({enterCinema:openCinema});
 // Build the responsive layout before observers begin preview playback.
 attachArrivalInteractions({enterGallery:()=>world.arrive()});
 attachResponsiveGallery();
 attachGalleryHUD({modal,pause:()=>world.stop(),resume:()=>runtime?.resume(),onHelp:()=>tutorial.open()});
-window.addEventListener('serengeti-teaser-play',()=>{clearInterval(audioTimer);audioCtx?.suspend();portraitWelcome.pause();});
-window.addEventListener('serengeti-portrait-play',()=>{clearInterval(audioTimer);audioCtx?.suspend();});
-window.addEventListener('serengeti-audio-request',e=>{
- const enabled=!!e.detail;
- clearInterval(audioTimer);audioCtx?.suspend();
- $('#sound span').textContent=enabled?'Sound On':'Sound Off';
- portraitWelcome.setSound(enabled);
- window.dispatchEvent(new CustomEvent('serengeti-sound',{detail:enabled}));
-});
+galleryAudio.sync();

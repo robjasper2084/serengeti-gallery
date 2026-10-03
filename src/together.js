@@ -1,20 +1,26 @@
-import {GalleryRoom,validRoom,cleanName} from './online-room.js';
-import {RoomVoice} from './room-voice.js';
+import {validRoom,cleanName} from './room-identity.js';
 import {readSaved,writeSaved} from './visitor-settings.js';
 
 export function attachTogether({chess,pause=()=>{},resume=()=>{},toast=()=>{}}){
- const launch=document.createElement('button');launch.id='together-launch';launch.className='icon-button';launch.setAttribute('aria-label','Friends, live chess and chat');launch.setAttribute('aria-controls','together-panel');launch.setAttribute('aria-expanded','false');launch.innerHTML='<i class="ph-light ph-chats" aria-hidden="true"></i><span class="friend-count"></span>';document.querySelector('#menu-nav').before(launch);
+ const launch=document.createElement('button');launch.id='together-launch';launch.className='icon-button';launch.setAttribute('aria-label','Friends, live chess and chat');launch.setAttribute('aria-controls','together-panel');launch.setAttribute('aria-expanded','false');launch.innerHTML='<i class="ph-light ph-chats" aria-hidden="true"></i><span class="friend-label">Friends</span><span class="friend-online" aria-hidden="true"></span><span class="friend-count" aria-label="Unread messages"></span>';document.querySelector('#menu-nav').before(launch);
  const panel=document.createElement('aside');panel.id='together-panel';panel.hidden=true;panel.setAttribute('aria-label','Friends and chat');
  panel.innerHTML=`<div class="together-heading"><div><small>VISIT TOGETHER</small><h2>Friends & chess</h2></div><button id="together-close" aria-label="Close friends and chat">✕</button></div><p id="room-status" role="status">Invite a friend or meet visitors who are here.</p><label for="visitor-name">Your nickname</label><input id="visitor-name" maxlength="24" autocomplete="off" placeholder="Visitor"><div class="together-actions"><button id="create-room">Invite friends</button><button id="meet-visitors">Meet visitors</button><button id="find-opponent">Find chess opponent</button><button id="open-online-board">Open chess board</button></div><div id="room-invite" hidden><label for="invite-link">Invite link</label><div class="invite-copy"><input id="invite-link" readonly><button id="copy-invite">Copy</button></div><small>Anyone with this link can join. Up to 4 microphones at a time. Chats last for this visit.</small></div><ul id="room-members" aria-label="People in your room"></ul><div id="visitor-list" aria-label="Available visitors"></div><div id="room-communication" hidden><div class="voice-actions"><button id="voice-start">Turn on microphone</button><button id="voice-mute" hidden>Mute mic</button><button id="voice-stop" hidden>Voice off</button><button id="voice-speakers">Enable speakers</button></div><p id="voice-status" role="status">Voice off</p><div id="room-messages" role="log" aria-live="polite" aria-label="Room chat"></div><form id="room-chat-form"><label for="chat-message">Message your room</label><div class="chat-send"><input id="chat-message" maxlength="500" placeholder="Say hello…" autocomplete="off"><button type="submit">Send</button></div></form><button id="leave-room">Leave shared room</button></div>`;document.body.append(panel);
+ const presence=document.createElement('p');presence.className='visitor-presence';presence.id='visitor-presence';presence.setAttribute('role','status');presence.textContent='See who is online with Meet visitors. Only visitors sharing a room appear.';panel.querySelector('#room-status').after(presence);
  const $=s=>panel.querySelector(s);let room=null,voice=null,promise=null,busy=false,unread=0,returnFocus=null,renderedRoom='';
  $('#visitor-name').value=cleanName(readSaved('serengeti-visitor-name','Visitor'));
- function open(){returnFocus=document.activeElement;panel.hidden=false;document.body.classList.add('together-open');launch.setAttribute('aria-expanded','true');pause();unread=0;launch.querySelector('.friend-count').textContent='';$('#together-close').focus();}
- function close(){panel.hidden=true;document.body.classList.remove('together-open');launch.setAttribute('aria-expanded','false');(returnFocus?.isConnected?returnFocus:launch).focus();resume();}
+ const drawer=matchMedia('(max-width:1100px)');
+ const modal=document.querySelector('#modal');
+ const visible=element=>element?.isConnected&&element.getClientRects().length>0&&getComputedStyle(element).visibility!=='hidden';
+ function isDialog(){return drawer.matches||modal.open;}
+ function syncAccess(){const dialog=!panel.hidden&&isDialog();panel.setAttribute('role',dialog?'dialog':'complementary');if(dialog)panel.setAttribute('aria-modal','true');else panel.removeAttribute('aria-modal');}
+ drawer.addEventListener('change',syncAccess);
+ function open(){if(panel.hidden)returnFocus=document.activeElement;panel.hidden=false;document.body.classList.add('together-open');launch.setAttribute('aria-expanded','true');syncAccess();pause();unread=0;launch.querySelector('.friend-count').textContent='';$('#together-close').focus();}
+ function close(){panel.hidden=true;document.body.classList.remove('together-open');launch.setAttribute('aria-expanded','false');syncAccess();[returnFocus,launch,document.querySelector('#chess-controls')].find(visible)?.focus();resume();}
  launch.onclick=()=>panel.hidden?open():close();$('#together-close').onclick=close;
- panel.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'){e.preventDefault();close();}});panel.addEventListener('pointerdown',e=>e.stopPropagation());
+ panel.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'){e.preventDefault();close();return;}if(e.key==='Tab'&&isDialog()){const controls=[...panel.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],[tabindex="0"]')].filter(visible);const first=controls[0],last=controls.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}});panel.addEventListener('pointerdown',e=>e.stopPropagation());
  // Keep chat reachable while artwork or the lightweight film is in the top-layer dialog.
- const modal=document.querySelector('#modal'),modalChat=document.createElement('button');modalChat.className='modal-friends';modalChat.textContent='Friends & chat';modalChat.onclick=open;modal.append(modalChat);
- new MutationObserver(()=>{if(modal.open){if(panel.parentElement!==modal)modal.append(panel);}else if(panel.parentElement===modal)document.body.append(panel);}).observe(modal,{attributes:true,attributeFilter:['open']});
+ const modalChat=document.createElement('button');modalChat.className='modal-friends';modalChat.textContent='Friends & chat';modalChat.onclick=open;modal.append(modalChat);
+ new MutationObserver(()=>{if(modal.open){if(panel.parentElement!==modal)modal.append(panel);}else if(panel.parentElement===modal)document.body.append(panel);syncAccess();}).observe(modal,{attributes:true,attributeFilter:['open']});
  function status(message){$('#room-status').textContent=message;}
  function render(){
   chess.setRoom(room);voice?.sync();if(!room)return;
@@ -28,6 +34,9 @@ export function attachTogether({chess,pause=()=>{},resume=()=>{},toast=()=>{}}){
   $('#find-opponent').textContent=room.waiting?'Searching… (cancel)':'Find chess opponent';
  }
  function visitors(entries){
+  const count=new Set(entries.map(p=>p.id)).size;
+  launch.querySelector('.friend-online').textContent=room?.lobby?String(count):'';
+  presence.textContent=room?.lobby?`${count} ${count===1?'visitor':'visitors'} online in shared rooms · including you`:'See who is online with Meet visitors. Only visitors sharing a room appear.';
   const list=$('#visitor-list');list.replaceChildren();const others=entries.filter(p=>p.id!==room?.id&&p.room!==room?.room).slice(0,30);
   if(room?.lobby){const title=document.createElement('p');title.textContent=others.length?'Visitors open to company':'No other visitors yet. Share your invite link or keep this open.';list.append(title);}
   for(const p of others){const button=document.createElement('button');button.textContent='Join '+cleanName(p.name)+' · '+String(p.activity||'Lobby').slice(0,24);button.onclick=()=>run(async()=>{await voice?.stop();await room.stopBrowsing();await room.connect(p.room,false);open();});list.append(button);}
@@ -41,7 +50,7 @@ export function attachTogether({chess,pause=()=>{},resume=()=>{},toast=()=>{}}){
   if(!promise)promise=(async()=>{
    const url=import.meta.env.VITE_SUPABASE_URL,key=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
    if(!url||!key)throw Error('Live rooms are not configured. Local chess is available.');
-   const {createClient}=await import('@supabase/supabase-js');const client=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storageKey:'serengeti-live-guest'}});
+   const [{createClient},{GalleryRoom},{RoomVoice}]=await Promise.all([import('@supabase/supabase-js'),import('./online-room.js'),import('./room-voice.js')]);const client=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storageKey:'serengeti-live-guest'}});
    let id=readSaved('serengeti-live-id',null,sessionStorage);if(!validRoom(id)){id=crypto.randomUUID();writeSaved('serengeti-live-id',id,sessionStorage);}
    room=new GalleryRoom({client,id,name:$('#visitor-name').value,onChange:render,onChat:chat,onSignal:p=>voice?.receive(p),onVisitors:visitors,save:(r,s)=>writeSaved('serengeti-room-'+r,s,sessionStorage),load:r=>readSaved('serengeti-room-'+r,null,sessionStorage)});
    voice=new RoomVoice({room,onStatus:message=>{$('#voice-status').textContent=message;$('#voice-start').hidden=!!voice.stream;$('#voice-mute').hidden=$('#voice-stop').hidden=!voice.stream;$('#voice-mute').textContent=voice.muted?'Unmute mic':'Mute mic';}});
@@ -64,6 +73,7 @@ export function attachTogether({chess,pause=()=>{},resume=()=>{},toast=()=>{}}){
  window.addEventListener('pagehide',()=>{voice?.stop();room?.leave();});
  window.addEventListener('offline',()=>{status('You are offline. Live chat and chess will reconnect when your connection returns.');voice?.sync();});
  const invite=new URL(location.href).searchParams.get('room');
- if(invite){open();run(async()=>{if(!validRoom(invite))throw Error('This invite link is not valid.');const r=await ensure();const saved=readSaved('serengeti-room-'+invite,null,sessionStorage);await r.connect(invite,saved?.host===true);chess.open();render();});}
+ // An invite joins in the background; Friends and chess open only on request.
+ if(invite){run(async()=>{if(!validRoom(invite))throw Error('This invite link is not valid.');const r=await ensure();const saved=readSaved('serengeti-room-'+invite,null,sessionStorage);await r.connect(invite,saved?.host===true);render();});}
  return {open,close,openChess(){chess.open();open();},leave:async()=>{await voice?.stop();await room?.leave();}};
 }

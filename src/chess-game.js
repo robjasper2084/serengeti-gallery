@@ -12,7 +12,7 @@ export class GalleryChessGame {
  state(){let board='';for(let rank=1;rank<=8;rank++)for(const file of 'abcdefgh'){const p=this.game.get(file+rank);board+=p?(p.color==='w'?p.type.toUpperCase():p.type):'.';}const turn=this.game.turn()==='w'?'White':'Black';return {board,selected:this.selected,legal:this.selected?this.game.moves({square:this.selected,verbose:true}).map(m=>m.to).join(','):'',status:this.game.isCheckmate()?`${turn} is checkmated`:this.game.isDraw()?'Draw':`${turn} to move${this.game.isCheck()?' — check':''}`,mode:this.mode===1?'1 player · You are White':'2 players · Local turns'};}
 }
 export function attachChess({onOnline=()=>{},onOpen=()=>{},onClose=()=>{}}={}){
- const chess=new GalleryChessGame();chess.restore(readSaved('serengeti-chess',null));let timer,instance=null,room=null,localSave=null;
+ const chess=new GalleryChessGame();chess.restore(readSaved('serengeti-chess',null));let timer,instance=null,tableFocus=null,room=null,localSave=null;
  const panel=document.createElement('section');panel.id='chess-controls';panel.hidden=true;panel.setAttribute('aria-label','Chess game');panel.tabIndex=-1;
  panel.innerHTML=`<div class="chess-heading"><h2>Serengeti Chess</h2><button data-chess="leave" aria-label="Close chess">✕</button></div><div class="chess-layout"><div class="accessible-chess"><div role="grid" aria-label="Chess board"></div></div><div class="chess-options"><p class="chess-status" role="status" aria-live="polite"></p><div class="chess-modes"><button data-chess="one">Computer</button><button data-chess="two">Local 2 players</button><button data-chess="online">Play online</button></div><div class="chess-tools"><button data-chess="new">New game</button><button data-chess="undo">Undo</button><button type="button" class="read-board">Read position</button></div><div class="chess-confirm" hidden><p>Start a new game? Your current local game will be replaced.</p><button data-chess="confirm">Start new game</button><button data-chess="cancel">Keep game</button></div><p class="chess-instructions">Drag a piece to a green square, or tap the piece then its destination. Arrow keys and Enter also work. Pawns become queens.</p><div class="chess-last" aria-live="polite"></div></div></div>`;document.body.append(panel);
  const board=panel.querySelector('.accessible-chess');let focusSquare='e2',resetMode=null;
@@ -42,11 +42,15 @@ export function attachChess({onOnline=()=>{},onOpen=()=>{},onClose=()=>{}}={}){
   if(!online)writeSaved('serengeti-chess',chess.snapshot());drawBoard();
  }
  function schedule(){clearTimeout(timer);if(!room?.room&&chess.mode===1&&chess.game.turn()==='b'&&!chess.game.isGameOver())timer=setTimeout(()=>{chess.computer();sync();},250);}
- function open(){panel.hidden=false;document.body.classList.add('chess-active');onOpen();sync();panel.focus();}
+ function open(focusTable=true){
+  // Friends uses the same chair and camera as the gallery's Play chess shortcut.
+  if(focusTable&&instance&&document.body.classList.contains('exploring')&&!document.body.classList.contains('chess-active')){if(tableFocus)tableFocus();else instance.SendMessage('Gallery chess','Choose','focus');}
+  panel.hidden=false;document.body.classList.add('chess-active');onOpen();sync();panel.focus();
+ }
  function leave(){panel.hidden=true;document.body.classList.remove('chess-active');instance?.SendMessage('Gallery chess','Leave');onClose();}
  function reset(mode){if(!room?.room){chess.reset(mode);panel.querySelector('.chess-confirm').hidden=true;resetMode=null;sync();schedule();}}
  function handle(action){
-  if(action==='focus'){open();return;}if(action==='leave'){panel.hidden=true;document.body.classList.remove('chess-active');onClose();return;}
+  if(action==='focus'){open(false);return;}if(action==='leave'){panel.hidden=true;document.body.classList.remove('chess-active');onClose();return;}
   if(action==='online'){onOnline();return;}
   if(action==='cancel'){panel.querySelector('.chess-confirm').hidden=true;resetMode=null;return;}
   if(action==='confirm'){if(resetMode!==null)reset(resetMode);return;}
@@ -75,7 +79,7 @@ export function attachChess({onOnline=()=>{},onOpen=()=>{},onClose=()=>{}}={}){
  panel.querySelector('.read-board').onclick=()=>{panel.querySelector('.chess-last').textContent=chess.state().status+'. '+[...board.querySelectorAll('[data-square]')].filter(b=>chess.game.get(b.dataset.square)).map(b=>describe(b.dataset.square)).join('; ');};
  panel.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'){e.preventDefault();leave();}});
  window.addEventListener('serengeti-chess',e=>handle(e.detail));sync();schedule();
- return {open,leave,setInstance(value){instance=value;sync();},setRoom(value){
+ return {open,leave,setInstance(value,focus){instance=value;tableFocus=focus;sync();},setRoom(value){
   const online=!!value?.room;
   if(online){if(!localSave)localSave=chess.snapshot();clearTimeout(timer);const changed=chess.game!==value.game;room=value;chess.game=value.game;if(changed)chess.selected='';}
   else{room=null;if(localSave){chess.restore(localSave);localSave=null;}schedule();}sync();

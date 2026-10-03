@@ -8,3 +8,6 @@
 .modal-friends{position:sticky;top:8px;display:block;min-height:44px;margin:8px auto -52px 12px;padding:10px 14px;border:1px solid #b39461;border-radius:9px;background:#253024;z-index:4}#modal>#together-panel{position:fixed;top:8px;bottom:8px;right:8px;max-height:calc(100dvh - 48px)}
 @media(max-width:600px){#together-panel{inset:calc(var(--gallery-header,112px) + 4px) 8px max(8px,env(safe-area-inset-bottom));width:calc(100% - 16px);padding:14px}.header-tools{gap:2px!important}.header-tools #together-launch{width:40px;min-width:40px}.header-tools #together-launch i{font-size:23px}}
 @media(max-height:500px){#together-panel{inset:calc(var(--gallery-header,64px) + 4px) 8px 6px auto;padding:12px}.together-heading h2{font-size:21px}#room-messages{max-height:110px}}
+/* Desktop keeps the board and chat side by side. A small screen shows one at a time. */
+@media(min-width:1101px){body.together-open.chess-active:not(.exploring) #chess-controls{left:16px;right:auto;margin:0;width:min(920px,calc(100% - 438px))}}
+@media(max-width:1100px){.together-open.chess-active #chess-controls{visibility:hidden;pointer-events:none}}

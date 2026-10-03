@@ -5,8 +5,9 @@ body.chess-active #chess-controls,body.chess-active #chess-controls:has(details[
 #chess-controls .chess-layout{display:flex!important;align-items:center;gap:20px;flex:1;min-height:0;margin:0!important}
 #chess-controls .accessible-chess{width:min(58%,calc(100dvh - var(--gallery-header,80px) - 110px));max-width:540px;aspect-ratio:1;flex:none;margin:0;touch-action:none;user-select:none;border:3px solid #ba945e;border-radius:4px;overflow:hidden}
 #chess-controls .accessible-chess [role=grid]{height:100%;width:100%;display:grid!important;grid-template-rows:repeat(8,1fr);gap:0!important;margin:0!important}
-#chess-controls .accessible-chess [role=row]{min-height:0;height:auto}.accessible-chess [role=gridcell]{min-height:0}
-#chess-controls .accessible-chess button[data-square]{height:100%;min-height:0!important;aspect-ratio:1;display:grid;place-items:center;cursor:grab;font-size:clamp(24px,4.5vw,52px);touch-action:none}
+#chess-controls .accessible-chess [role=row]{min-width:0;min-height:0;height:auto;grid-template-columns:repeat(8,minmax(0,1fr))}.accessible-chess [role=gridcell]{min-width:0;min-height:0;overflow:hidden}
+#chess-controls .accessible-chess button[data-square]{width:100%;min-width:0;height:100%;min-height:0!important;aspect-ratio:1;display:grid;place-items:center;cursor:grab;font-size:clamp(24px,4.5vw,42px);touch-action:none;overflow:hidden}
+#chess-controls .accessible-chess .piece-w,#chess-controls .accessible-chess .piece-b{min-width:0;max-width:100%;font-size:1em}
 .accessible-chess .piece-w,.chess-drag-piece.piece-w{color:#fff8e8;text-shadow:0 1px 1px #181b13,1px 0 1px #181b13,-1px 0 1px #181b13,0 -1px 1px #181b13}.accessible-chess .piece-b,.chess-drag-piece.piece-b{color:#18271c;text-shadow:0 1px 1px #fff4d6,1px 0 1px #fff4d6,-1px 0 1px #fff4d6}
 #chess-controls .accessible-chess .legal{background:#7ca575!important;box-shadow:inset 0 0 0 3px #b6f9b6}.accessible-chess .legal:empty:after{content:'●'}.accessible-chess [aria-pressed=true]{background:#d9b257!important}
 #chess-controls .chess-options{display:block;flex:1;min-width:0;max-height:100%;overflow:auto;padding:4px;margin:0;scrollbar-width:thin}.chess-status{font-size:16px;line-height:1.5;color:#fae8c2;margin:0 0 14px!important}

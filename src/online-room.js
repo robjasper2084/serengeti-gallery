@@ -1,7 +1,7 @@
 import {Chess} from 'chess.js';
 
-export const validRoom = value => typeof value === 'string' && /^[a-f0-9-]{36}$/.test(value) && /^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(value);
-export const cleanName = value => String(value || 'Visitor').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 24) || 'Visitor';
+import {validRoom,cleanName} from './room-identity.js';
+export {validRoom,cleanName} from './room-identity.js';
  export const waitingPair = entries => entries.filter(p => p.waiting && validRoom(p.room) && validRoom(p.id) && Number.isFinite(p.at)).sort((a,b) => a.at-b.at || a.id.localeCompare(b.id)).slice(0,2);
 
 // Casual guest rooms use opaque invite IDs and Realtime; no account or personal data is required.
