@@ -21,7 +21,8 @@ export function createPortraitWelcome() {
  controls.append(movement,control);
  const caption=document.createElement('div');caption.id='welcome-caption';arrival.append(caption);
  let captions=readSaved('serengeti-captions',true)!==false;
- const visible=()=>!document.body.classList.contains('exploring')&&!modal.open&&!document.hidden&&loading.classList.contains('hidden');
+ let inView=typeof IntersectionObserver==='undefined';
+ const visible=()=>inView&&!document.body.classList.contains('exploring')&&!modal.open&&!document.hidden&&loading.classList.contains('hidden');
  const updateCaption=()=>{caption.textContent=captions&&narrating&&!video.muted&&!video.paused&&!video.ended&&visible()?(video.currentTime<5.54?'Welcome to Serengeti Gallery, here in Detroit.':'Explore the art, enjoy the cinema, and make yourself at home.'):'';};
  function label() {
   const playing=requested&&!video.paused&&visible();
@@ -81,6 +82,8 @@ export function createPortraitWelcome() {
  new MutationObserver(sync).observe(modal,{attributes:true,attributeFilter:['open']});
  new MutationObserver(sync).observe(loading,{attributes:true,attributeFilter:['class']});
  document.addEventListener('visibilitychange',sync);
+ // Avoid decoding the portrait while a phone visitor scrolls further down.
+ if(typeof IntersectionObserver!=='undefined')new IntersectionObserver(entries=>{inView=entries.some(entry=>entry.isIntersecting);sync();}).observe(arrival);
  sync();
  return {
   pause(){requested=false;userPaused=true;controller.transition('pause');video.pause();label();},

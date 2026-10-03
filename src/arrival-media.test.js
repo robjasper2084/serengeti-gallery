@@ -4,8 +4,8 @@ import {createPortraitWelcome} from './portrait-welcome.js';
 import {createCinemaTeaser} from './cinema-teaser.js';
 
 // Exercise the real media controllers, including browser events and playback.
-function browserFixture({reduced=false,savedMotion=null}={}) {
- const originals=new Map(),nodes=[];
+function browserFixture({reduced=false,savedMotion=null,observeVisibility=false}={}) {
+ const originals=new Map(),nodes=[],intersections=new Map();
  class Element extends EventTarget {
   constructor(tag='div',id=''){super();this.tagName=tag;this.id=id;this.style={};this.parts=new Map();this.open=false;this.hidden=false;this.paused=true;this.muted=true;this.currentTime=0;this.ended=false;
    const classes=new Set();this.classList={add:n=>classes.add(n),remove:n=>classes.delete(n),contains:n=>classes.has(n),toggle:(n,on)=>{const next=on??!classes.has(n);next?classes.add(n):classes.delete(n);return next;}};nodes.push(this);}
@@ -30,7 +30,8 @@ function browserFixture({reduced=false,savedMotion=null}={}) {
  install('document',document);install('window',window);install('matchMedia',()=>motion);
  install('localStorage',{getItem:key=>storage.get(key)??null});install('getComputedStyle',()=>({objectPosition:'50% 50%'}));
  install('ResizeObserver',class{observe(){}});install('MutationObserver',class{observe(){}});
- return {document,window,motion,get:id=>nodes.find(n=>n.id===id),reduce(value){storage.set('serengeti-reduced-motion',JSON.stringify(value));window.dispatchEvent(new CustomEvent('serengeti-motion',{detail:value}));},restore(){for(const [key,descriptor]of originals){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}}};
+ if(observeVisibility)install('IntersectionObserver',class{constructor(callback){this.callback=callback;}observe(element){intersections.set(element.id,this.callback);}});
+ return {document,window,motion,get:id=>nodes.find(n=>n.id===id),visible(id,value){intersections.get(id)([{isIntersecting:value}]);},reduce(value){storage.set('serengeti-reduced-motion',JSON.stringify(value));window.dispatchEvent(new CustomEvent('serengeti-motion',{detail:value}));},restore(){for(const [key,descriptor]of originals){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}}};
 }
 
 test('portrait starts moving muted, loops, and preserves an explicit pause after a visibility change',()=>{
@@ -75,5 +76,21 @@ test('changing motion preference pauses both previews and restores only automati
   f.reduce(false);assert.equal(portrait.paused,false);assert.equal(teaser.paused,false);
   f.get('portrait-motion-control').onclick();f.get('cinema-teaser-controls').querySelector('#teaser-play').onclick();
   f.reduce(true);f.reduce(false);assert.equal(portrait.paused,true);assert.equal(teaser.paused,true);
+ }finally{f.restore();}
+});
+
+test('off-screen previews defer loading, pause decoding, and preserve an explicit pause when scrolled back',()=>{
+ const f=browserFixture({observeVisibility:true});try{
+  createPortraitWelcome();createCinemaTeaser({enterCinema(){}});
+  const portrait=f.get('portrait-welcome'),teaser=f.get('cinema-teaser');
+  assert.equal(portrait.src,undefined);assert.equal(teaser.src,undefined);
+  f.visible('arrival',true);assert.equal(portrait.paused,false);assert.equal(teaser.src,undefined);
+  f.visible('arrival',false);assert.equal(portrait.paused,true);
+  f.visible('cinema-teaser-stage',true);assert.equal(teaser.paused,false);
+  f.visible('cinema-teaser-stage',false);assert.equal(teaser.paused,true);
+  f.visible('arrival',true);assert.equal(portrait.paused,false);f.get('portrait-motion-control').onclick();
+  f.visible('arrival',false);f.visible('arrival',true);assert.equal(portrait.paused,true);
+  f.visible('cinema-teaser-stage',true);f.get('cinema-teaser-controls').querySelector('#teaser-play').onclick();
+  f.visible('cinema-teaser-stage',false);f.visible('cinema-teaser-stage',true);assert.equal(teaser.paused,true);
  }finally{f.restore();}
 });

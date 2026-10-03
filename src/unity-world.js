@@ -32,7 +32,7 @@ export async function createUnityGallery({artworks,onArt,onRoom,toast}) {
  window.addEventListener('serengeti-art',e=>onArt(Number(e.detail)));
  window.addEventListener('serengeti-sound',e=>cinema.setSound(e.detail));
  window.addEventListener('serengeti-motion',e=>send('SetMotion',e.detail?'0':'1'));
- send('SetMotion',matchMedia('(prefers-reduced-motion: reduce)').matches?'0':'1');
+ send('SetMotion',readSaved('serengeti-reduced-motion',matchMedia('(prefers-reduced-motion: reduce)').matches)?'0':'1');
  function updateRoom(n){
   if(room!==n){
    if(n!==0)piano.leave();
