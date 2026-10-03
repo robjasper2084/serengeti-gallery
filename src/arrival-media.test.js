@@ -5,7 +5,8 @@ import {createCinemaTeaser} from './cinema-teaser.js';
 
 // Exercise the real media controllers, including browser events and playback.
 function browserFixture({reduced=false,savedMotion=null,observeVisibility=false}={}) {
- const originals=new Map(),nodes=[],intersections=new Map();
+ const originals=new Map(),nodes=[],intersections=new Map(),timers=new Map();
+ let now=0,nextTimer=1;
  class Element extends EventTarget {
   constructor(tag='div',id=''){super();this.tagName=tag;this.id=id;this.style={};this.parts=new Map();this.open=false;this.hidden=false;this.paused=true;this.muted=true;this.currentTime=0;this.ended=false;
    const classes=new Set();this.classList={add:n=>classes.add(n),remove:n=>classes.delete(n),contains:n=>classes.has(n),toggle:(n,on)=>{const next=on??!classes.has(n);next?classes.add(n):classes.delete(n);return next;}};nodes.push(this);}
@@ -30,14 +31,17 @@ function browserFixture({reduced=false,savedMotion=null,observeVisibility=false}
  install('document',document);install('window',window);install('matchMedia',()=>motion);
  install('localStorage',{getItem:key=>storage.get(key)??null});install('getComputedStyle',()=>({objectPosition:'50% 50%'}));
  install('ResizeObserver',class{observe(){}});install('MutationObserver',class{observe(){}});
+ install('setTimeout',(callback,ms)=>{const id=nextTimer++;timers.set(id,{callback,at:now+ms});return id;});
+ install('clearTimeout',id=>timers.delete(id));
  if(observeVisibility)install('IntersectionObserver',class{constructor(callback){this.callback=callback;}observe(element){intersections.set(element.id,this.callback);}});
- return {document,window,motion,get:id=>nodes.find(n=>n.id===id),visible(id,value){intersections.get(id)([{isIntersecting:value}]);},reduce(value){storage.set('serengeti-reduced-motion',JSON.stringify(value));window.dispatchEvent(new CustomEvent('serengeti-motion',{detail:value}));},restore(){for(const [key,descriptor]of originals){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}}};
+ return {document,window,motion,get:id=>nodes.find(n=>n.id===id),advance(ms){const target=now+ms;for(;;){const next=[...timers.entries()].sort((a,b)=>a[1].at-b[1].at)[0];if(!next||next[1].at>target)break;now=next[1].at;timers.delete(next[0]);next[1].callback();}now=target;},visible(id,value){intersections.get(id)([{isIntersecting:value}]);},reduce(value){storage.set('serengeti-reduced-motion',JSON.stringify(value));window.dispatchEvent(new CustomEvent('serengeti-motion',{detail:value}));},restore(){for(const [key,descriptor]of originals){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}}};
 }
 
-test('portrait starts moving muted, loops, and preserves an explicit pause after a visibility change',()=>{
+test('portrait waits three seconds, plays muted without looping, and preserves an explicit pause',()=>{
  const f=browserFixture();try{
   createPortraitWelcome();const video=f.get('portrait-welcome');
-  assert.equal(video.paused,false);assert.equal(video.muted,true);assert.equal(video.loop,true);assert.ok(video.src.endsWith('/portrait-welcome.mp4'));
+  f.advance(2999);assert.equal(video.paused,true);assert.equal(video.src,undefined);
+  f.advance(1);assert.equal(video.paused,false);assert.equal(video.muted,true);assert.equal(video.loop,false);assert.ok(video.src.endsWith('/portrait-welcome.mp4'));
   f.get('portrait-motion-control').onclick();assert.equal(video.paused,true);
   f.document.hidden=true;f.document.dispatchEvent(new Event('visibilitychange'));
   f.document.hidden=false;f.document.dispatchEvent(new Event('visibilitychange'));assert.equal(video.paused,true);
@@ -45,15 +49,16 @@ test('portrait starts moving muted, loops, and preserves an explicit pause after
  }finally{f.restore();}
 });
 
-test('narration requests global sound, supports pause/resume, and returns to silent motion after completion',()=>{
+test('narration requests sound, supports pause/resume, and stays still after completion',()=>{
  const f=browserFixture();try{
   const soundRequests=[];let completed=0;f.window.addEventListener('serengeti-audio-request',e=>soundRequests.push(e.detail));f.window.addEventListener('serengeti-portrait-complete',()=>completed++);
   const portrait=createPortraitWelcome(),video=f.get('portrait-welcome'),button=f.get('welcome-control');
   button.onclick();assert.deepEqual(soundRequests,[true]);assert.equal(video.muted,false);assert.equal(video.loop,false);
   button.onclick();assert.equal(video.paused,true);assert.equal(button.getAttribute('aria-label'),'Resume the portrait welcome');
   button.onclick();assert.equal(video.paused,false);
-  video.finish();assert.equal(completed,1);assert.equal(video.paused,false);assert.equal(video.loop,true);assert.equal(video.muted,true);assert.equal(f.get('portrait-stage').classList.contains('ready'),true);
-  button.onclick();portrait.setSound(false);assert.equal(video.muted,true);assert.equal(video.loop,true);
+  video.finish();assert.equal(completed,1);assert.equal(video.paused,true);assert.equal(video.loop,false);assert.equal(video.muted,true);assert.equal(f.get('portrait-stage').classList.contains('ready'),true);
+  assert.equal(f.get('portrait-motion-control').getAttribute('aria-label'),'Replay portrait motion');
+  button.onclick();portrait.setSound(false);assert.equal(video.muted,true);assert.equal(video.loop,false);
   portrait.setSound(true);assert.equal(video.muted,true,'enabling sound alone must not start narration');
  }finally{f.restore();}
 });
@@ -62,6 +67,7 @@ for(const preference of [{reduced:true},{savedMotion:true}])test(`both previews 
  const f=browserFixture(preference);try{
   createPortraitWelcome();createCinemaTeaser({enterCinema(){}});
   const portrait=f.get('portrait-welcome'),teaser=f.get('cinema-teaser');
+  f.advance(3000);
   assert.equal(portrait.src,undefined);assert.equal(teaser.src,undefined);assert.equal(teaser.autoplay,false);
   f.get('welcome-control').onclick();assert.equal(portrait.paused,false);
   const panel=f.get('cinema-teaser-controls');panel.querySelector('#teaser-play').onclick();assert.equal(teaser.paused,false);
@@ -72,6 +78,7 @@ test('changing motion preference pauses both previews and restores only automati
  const f=browserFixture();try{
   createPortraitWelcome();createCinemaTeaser({enterCinema(){}});
   const portrait=f.get('portrait-welcome'),teaser=f.get('cinema-teaser');
+  f.advance(3000);
   f.reduce(true);assert.equal(portrait.paused,true);assert.equal(teaser.paused,true);
   f.reduce(false);assert.equal(portrait.paused,false);assert.equal(teaser.paused,false);
   f.get('portrait-motion-control').onclick();f.get('cinema-teaser-controls').querySelector('#teaser-play').onclick();
@@ -84,7 +91,7 @@ test('off-screen previews defer loading, pause decoding, and preserve an explici
   createPortraitWelcome();createCinemaTeaser({enterCinema(){}});
   const portrait=f.get('portrait-welcome'),teaser=f.get('cinema-teaser');
   assert.equal(portrait.src,undefined);assert.equal(teaser.src,undefined);
-  f.visible('arrival',true);assert.equal(portrait.paused,false);assert.equal(teaser.src,undefined);
+  f.visible('arrival',true);f.advance(3000);assert.equal(portrait.paused,false);assert.equal(teaser.src,undefined);
   f.visible('arrival',false);assert.equal(portrait.paused,true);
   f.visible('cinema-teaser-stage',true);assert.equal(teaser.paused,false);
   f.visible('cinema-teaser-stage',false);assert.equal(teaser.paused,true);
@@ -92,5 +99,34 @@ test('off-screen previews defer loading, pause decoding, and preserve an explici
   f.visible('arrival',false);f.visible('arrival',true);assert.equal(portrait.paused,true);
   f.visible('cinema-teaser-stage',true);f.get('cinema-teaser-controls').querySelector('#teaser-play').onclick();
   f.visible('cinema-teaser-stage',false);f.visible('cinema-teaser-stage',true);assert.equal(teaser.paused,true);
+ }finally{f.restore();}
+});
+
+test('portrait restarts its initial countdown after being hidden',()=>{
+ const f=browserFixture({observeVisibility:true});try{
+  createPortraitWelcome();const video=f.get('portrait-welcome');
+  f.visible('arrival',true);f.advance(2000);f.visible('arrival',false);f.advance(10000);
+  assert.equal(video.src,undefined);
+  f.visible('arrival',true);f.advance(2999);assert.equal(video.paused,true);assert.equal(video.src,undefined);
+  f.advance(1);assert.equal(video.paused,false);
+ }finally{f.restore();}
+});
+
+test('a completed portrait never restarts automatically and can be explicitly replayed',()=>{
+ const f=browserFixture({observeVisibility:true});try{
+  createPortraitWelcome();const video=f.get('portrait-welcome');
+  f.visible('arrival',true);f.advance(3000);video.currentTime=11;video.finish();
+  f.visible('arrival',false);f.visible('arrival',true);f.reduce(true);f.reduce(false);f.advance(10000);
+  assert.equal(video.paused,true);assert.equal(video.currentTime,11);assert.equal(video.loop,false);
+  const movement=f.get('portrait-motion-control');assert.equal(movement.querySelector('span').textContent,'Replay portrait');
+  movement.onclick();assert.equal(video.currentTime,0);assert.equal(video.paused,false);assert.equal(video.loop,false);
+ }finally{f.restore();}
+});
+
+test('manual playback cancels the countdown so it cannot interrupt a later pause',()=>{
+ const f=browserFixture();try{
+  createPortraitWelcome();const video=f.get('portrait-welcome'),movement=f.get('portrait-motion-control');
+  f.advance(1000);movement.onclick();assert.equal(video.paused,false);
+  movement.onclick();f.advance(10000);assert.equal(video.paused,true);
  }finally{f.restore();}
 });

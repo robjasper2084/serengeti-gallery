@@ -11,5 +11,5 @@ export function attachTouchNavigation({canvas,send,resume}){
  for(const name of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(name,e=>{if(look?.id===e.pointerId)look=null;});
  const clear=()=>{if(pointer!==null&&zone.hasPointerCapture(pointer))zone.releasePointerCapture(pointer);if(look&&canvas.hasPointerCapture(look.id))canvas.releasePointerCapture(look.id);stop();look=null;};window.addEventListener('blur',clear);window.addEventListener('orientationchange',clear);window.addEventListener('resize',clear);document.addEventListener('visibilitychange',()=>{if(document.hidden)clear();});
  new MutationObserver(()=>{if(document.querySelector('#modal').open)clear();}).observe(document.querySelector('#modal'),{attributes:true,attributeFilter:['open']});
- new MutationObserver(()=>{if(!document.body.classList.contains('exploring')||document.body.classList.contains('chess-active')||document.body.classList.contains('piano-active')||document.body.classList.contains('xr-active'))clear();}).observe(document.body,{attributes:true,attributeFilter:['class']});
+ new MutationObserver(()=>{if(!document.body.classList.contains('exploring')||['chess-active','piano-active','xr-active','activities-open','together-open'].some(name=>document.body.classList.contains(name)))clear();}).observe(document.body,{attributes:true,attributeFilter:['class']});
 }

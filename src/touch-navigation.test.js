@@ -17,7 +17,7 @@ function touchFixture(){
  }
  const calls=[];attachTouchNavigation({canvas,send:(...args)=>calls.push(args),resume(){}});
  const pointer=(target,type,id,x,y)=>target.dispatchEvent(Object.assign(new Event(type,{cancelable:true}),{pointerId:id,pointerType:'touch',clientX:x,clientY:y}));
- return{window,document,canvas,zone:document.body.child,modal,calls,pointer,openModal(){modal.open=true;observers.find(o=>o.target===modal).callback();},restore(){for(const [key,value]of originals)value?Object.defineProperty(globalThis,key,value):delete globalThis[key];}};
+ return{window,document,canvas,zone:document.body.child,modal,calls,pointer,openActivities(name='activities-open'){document.body.classes.add(name);observers.find(o=>o.target===document.body).callback();},openModal(){modal.open=true;observers.find(o=>o.target===modal).callback();},restore(){for(const [key,value]of originals)value?Object.defineProperty(globalThis,key,value):delete globalThis[key];}};
 }
 
 for(const event of ['orientationchange','resize'])test(`${event} releases movement and look pointers without retaining a held direction`,()=>{
@@ -36,5 +36,12 @@ test('opening artwork details cancels a held joystick and touch look',()=>{
  const f=touchFixture();try{
   f.pointer(f.zone,'pointerdown',1,10,10);f.pointer(f.zone,'pointermove',1,10,-44);f.pointer(f.canvas,'pointerdown',2,40,40);
   f.openModal();assert.deepEqual(f.calls.at(-1),['SetJoystick','0,0']);assert.equal(f.zone.captures.size,0);assert.equal(f.canvas.captures.size,0);
+ }finally{f.restore();}
+});
+
+for(const mode of ['activities-open','together-open'])test(`opening ${mode} releases held movement and camera pointers`,()=>{
+ const f=touchFixture();try{
+  f.pointer(f.zone,'pointerdown',1,10,10);f.pointer(f.zone,'pointermove',1,10,-44);f.pointer(f.canvas,'pointerdown',2,40,40);
+  f.openActivities(mode);assert.deepEqual(f.calls.at(-1),['SetJoystick','0,0']);assert.equal(f.zone.captures.size,0);assert.equal(f.canvas.captures.size,0);
  }finally{f.restore();}
 });

@@ -1,20 +1,21 @@
 import {attachTouchNavigation} from './touch-navigation.js';
 import {readSaved,qualityProfile} from './visitor-settings.js';
 import {attachPiano} from './piano.js';
-import {attachChess} from './chess-game.js';
 import {createCinemaPlayer} from './cinema-player.js';
-export async function createUnityGallery({artworks,onArt,onRoom,toast}) {
+export async function createUnityGallery({artworks,onArt,onRoom,toast,chess,onProgress=()=>{}}) {
  const profile=qualityProfile(readSaved('serengeti-quality','auto'),matchMedia('(pointer: coarse)').matches);
  const canvas=document.querySelector('#world');canvas.tabIndex=0;
  const response=await fetch('/serengeti-gallery/unity/build-manifest.json');if(!response.ok)throw Error('Unity build is not available');
  const manifest=await response.json();
  await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=manifest.loaderUrl;script.onload=resolve;script.onerror=()=>reject(Error('Unity loader failed'));document.head.appendChild(script);});
- const instance=await window.createUnityInstance(canvas,{...manifest.config,companyName:'Serengeti Gallery',productName:'Serengeti Gallery',productVersion:'1.1',matchWebGLToCanvasSize:true,devicePixelRatio:Math.min(devicePixelRatio,profile.ratio)},progress=>{document.querySelector('#loading small').textContent=`LOADING UNITY GALLERY · ${Math.round(progress*100)}%`;});
- instance.SendMessage('Playable portrait visitor','SetQuality',profile.mode);
+ const instance=await window.createUnityInstance(canvas,{...manifest.config,companyName:'Serengeti Gallery',productName:'Serengeti Gallery',productVersion:'1.1',matchWebGLToCanvasSize:true,devicePixelRatio:Math.min(devicePixelRatio,profile.ratio)},progress=>{onProgress(progress);});
+ const readyProfile=qualityProfile(readSaved('serengeti-quality','auto'),matchMedia('(pointer: coarse)').matches);
+ instance.Module.devicePixelRatio=Math.min(devicePixelRatio,readyProfile.ratio);
+ instance.SendMessage('Playable portrait visitor','SetQuality',readyProfile.mode);
  instance.SendMessage('Playable portrait visitor','SetCatalog',JSON.stringify({items:artworks.map((a,index)=>({index,title:a.title,artist:a.subtitle,description:a.description,note:a.note}))}));
  window.addEventListener('serengeti-quality',e=>{const p=qualityProfile(e.detail,matchMedia('(pointer: coarse)').matches);instance.Module.devicePixelRatio=Math.min(devicePixelRatio,p.ratio);instance.SendMessage('Playable portrait visitor','SetQuality',p.mode);});
  window.addEventListener('serengeti-vr-art',e=>{const index=Number(e.detail);const saved=readSaved('serengeti-discoveries',[]);const visits=new Set(Array.isArray(saved)?saved:[]);visits.add(index);try{localStorage.setItem('serengeti-discoveries',JSON.stringify([...visits]));}catch{}window.dispatchEvent(new CustomEvent('serengeti-discovered',{detail:index}));});
- attachChess(instance);
+ chess.setInstance(instance);
  const piano=attachPiano(instance);
  const cinema=createCinemaPlayer();
  const seats=document.createElement('div');seats.className='cinema-seat-picker';
@@ -25,7 +26,7 @@ export async function createUnityGallery({artworks,onArt,onRoom,toast}) {
  window.addEventListener('serengeti-xr',e=>{document.body.classList.toggle('xr-active',e.detail===true);document.querySelector('#world').dataset.xr=e.detail?'immersive-vr':'desktop';if(e.detail)cinema.leave();else if(room===2)cinema.enter();});
  const send=(method,value='')=>instance.SendMessage('Playable portrait visitor',method,String(value));
  let room=-1;
- const blocked=()=>document.querySelector('#modal').open||!document.querySelector('#menu').classList.contains('hidden');
+ const blocked=()=>document.querySelector('#modal').open||!document.querySelector('#menu').classList.contains('hidden')||['activities-open','together-open','chess-active'].some(c=>document.body.classList.contains(c));
  const resume=()=>send('SetPaused',document.body.classList.contains('exploring')&&!blocked()?'0':'1');
  document.body.classList.add('unity-ready');document.querySelector('#loading').classList.add('hidden');
  canvas.dataset.renderer='Unity WebGL';canvas.dataset.artworks='33';canvas.dataset.character='Circuit Suit curator';
