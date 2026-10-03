@@ -1,76 +1,89 @@
 import {projectiveTransform} from './projective-transform.js';
 import {readSaved} from './visitor-settings.js';
 import {LivingPortraitController} from './living-portrait-controller.js';
-// Fit the moving painting to the four inside corners of the existing gold frame.
-// Coordinates are measured in the 1536 × 1024 atrium photograph.
+// Inside corners of the gold frame in the 1536 x 1024 atrium photograph.
 const corners = [[176,100],[468,177],[460,619],[164,632]];
 export function createPortraitWelcome() {
- const arrival=document.querySelector('#arrival');
- const image=document.querySelector('#atrium-image');
- const stage=document.querySelector('#portrait-stage');
- const video=document.querySelector('#portrait-welcome');
- const control=document.querySelector('#welcome-control');
- const modal=document.querySelector('#modal');
- const loading=document.querySelector('#loading');
- const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
- let delayPassed=true;
- let requested=false,finished=false,ready=false,failed=false,sound=false;
+ const arrival=document.querySelector('#arrival'),image=document.querySelector('#atrium-image');
+ const stage=document.querySelector('#portrait-stage'),video=document.querySelector('#portrait-welcome');
+ const control=document.querySelector('#welcome-control'),modal=document.querySelector('#modal'),loading=document.querySelector('#loading');
+ const motion=matchMedia('(prefers-reduced-motion: reduce)');
+ const reduced=()=>readSaved('serengeti-reduced-motion',motion.matches)===true;
+ let requested=!reduced(),failed=false,sound=false,narrating=false,finished=false,userPaused=false;
  const controller=new LivingPortraitController();controller.transition('invite');
  video.style.transform=projectiveTransform(360,475,corners);
- video.muted=true;
+ video.muted=true;video.defaultMuted=true;video.playsInline=true;video.loop=true;
+
+ const controls=document.createElement('div');controls.id='portrait-controls';controls.setAttribute('role','group');controls.setAttribute('aria-label','Living portrait controls');
+ control.before(controls);
+ const movement=document.createElement('button');movement.id='portrait-motion-control';movement.className='portrait-motion-control';
+ movement.innerHTML='<i class="ph-light ph-pause" aria-hidden="true"></i><span>Pause portrait</span>';
+ controls.append(movement,control);
  const caption=document.createElement('div');caption.id='welcome-caption';arrival.append(caption);
  let captions=readSaved('serengeti-captions',true)!==false;
- const updateCaption=()=>{caption.textContent=captions&&!video.paused&&!video.ended&&visible()?(video.currentTime<5.54?'Welcome to Serengeti Gallery, here in Detroit.':'Explore the art, enjoy the cinema, and make yourself at home.'):'';};
- for(const event of ['timeupdate','play','pause','ended'])video.addEventListener(event,updateCaption);
- window.addEventListener('serengeti-captions',e=>{captions=e.detail;updateCaption();});
-
+ const visible=()=>!document.body.classList.contains('exploring')&&!modal.open&&!document.hidden&&loading.classList.contains('hidden');
+ const updateCaption=()=>{caption.textContent=captions&&narrating&&!video.muted&&!video.paused&&!video.ended&&visible()?(video.currentTime<5.54?'Welcome to Serengeti Gallery, here in Detroit.':'Explore the art, enjoy the cinema, and make yourself at home.'):'';};
+ function label() {
+  const playing=requested&&!video.paused&&visible();
+  movement.querySelector('span').textContent=playing?'Pause portrait':'Play portrait';
+  movement.querySelector('i').className=`ph-light ${playing?'ph-pause':'ph-play'}`;
+  movement.setAttribute('aria-label',playing?'Pause portrait motion':'Play portrait motion');
+  movement.setAttribute('aria-pressed',String(playing));
+  const action=narrating?(playing?'Pause welcome':'Resume welcome'):finished?'Replay welcome':'Hear welcome';
+  control.querySelector('span').textContent=action;
+  control.querySelector('i').className=`ph-light ${narrating&&playing?'ph-pause':'ph-speaker-high'}`;
+  control.setAttribute('aria-label',narrating?(playing?'Pause the portrait welcome':'Resume the portrait welcome'):finished?'Replay the portrait welcome':'Play the portrait welcome with sound');
+  control.setAttribute('aria-pressed',String(narrating&&playing));
+  updateCaption();
+ }
  function fit() {
-  const {width,height}=arrival.getBoundingClientRect();
-  const scale=Math.max(width/1536,height/1024);
+  const {width,height}=arrival.getBoundingClientRect(),scale=Math.max(width/1536,height/1024);
   const [px,py]=getComputedStyle(image).objectPosition.split(' ').map(n=>parseFloat(n)/100);
   stage.style.transform=`translate(${(width-1536*scale)*px}px,${(height-1024*scale)*py}px) scale(${scale})`;
  }
  new ResizeObserver(fit).observe(arrival);image.addEventListener('load',fit);fit();
- const visible=()=>!document.body.classList.contains('exploring')&&!modal.open&&!document.hidden&&loading.classList.contains('hidden');
- function label() {
-  const playing=delayPassed&&requested&&!finished&&visible();
-  control.querySelector('span').textContent=!sound?(finished?'Replay with sound':'Hear welcome'):finished?'Replay welcome':playing?'Pause welcome':'Play welcome';
-  control.querySelector('i').className=`ph-light ${playing?'ph-pause':'ph-play'}`;
-  control.setAttribute('aria-label',!sound?'Play the portrait welcome with sound':finished?'Replay the portrait welcome':playing?'Pause the portrait welcome':'Play the portrait welcome');
-  control.setAttribute('aria-pressed',String(playing&&sound));
- }
- function start() {
-  controller.transition('play');
-  if(!video.getAttribute('src')){video.src='/serengeti-gallery/assets/portrait-welcome.mp4';video.load();}
-  video.play().catch(()=>{requested=false;label();});
- }
  function sync() {
   if(failed)return;
-  if(delayPassed&&visible()&&requested&&!finished) start();else video.pause();
+  if(visible()&&requested){
+   if(!video.getAttribute('src')){video.src='/serengeti-gallery/assets/portrait-welcome.mp4';video.load();}
+   if(video.paused)video.play().catch(()=>{requested=false;label();});
+  }else video.pause();
   label();
  }
- video.addEventListener('loadeddata',()=>{ready=true;stage.classList.add('ready');sync();});
- video.addEventListener('ended',()=>{finished=true;requested=false;stage.classList.remove('ready');controller.transition('complete');window.dispatchEvent(new CustomEvent('serengeti-portrait-complete'));label();});
- video.addEventListener('error',()=>{failed=true;stage.classList.remove('ready');control.hidden=true;});
- const welcomeTimer=null;
- control.onclick=()=>{
-  if(!sound){sound=true;video.muted=false;window.dispatchEvent(new CustomEvent('serengeti-portrait-play'));}
-  if(!delayPassed){clearTimeout(welcomeTimer);delayPassed=true;requested=false;}
-  if(finished){video.currentTime=0;finished=false;requested=true;}else requested=!requested;
-  if(requested){stage.classList.add('ready');controller.transition('play');}else controller.transition('pause');sync();
+ movement.onclick=()=>{
+  requested=video.paused;userPaused=!requested;
+  if(requested&&narrating)controller.transition('play');
+  if(!requested&&narrating)controller.transition('pause');
+  sync();
  };
+ control.onclick=()=>{
+  if(narrating&&!video.paused){requested=false;userPaused=true;controller.transition('pause');sync();return;}
+  if(!narrating){video.currentTime=0;finished=false;}
+  narrating=true;sound=true;requested=true;userPaused=false;video.loop=false;video.muted=false;
+  controller.transition('play');
+  window.dispatchEvent(new CustomEvent('serengeti-audio-request',{detail:true}));
+  window.dispatchEvent(new CustomEvent('serengeti-portrait-play'));
+  sync();
+ };
+ video.addEventListener('loadeddata',()=>{stage.classList.add('ready');sync();});
+ video.addEventListener('ended',()=>{
+  if(narrating){finished=true;controller.transition('complete');window.dispatchEvent(new CustomEvent('serengeti-portrait-complete'));}
+  narrating=false;video.muted=true;video.loop=true;requested=!reduced()&&!userPaused;
+  if(requested)video.currentTime=0;
+  sync();
+ });
+ video.addEventListener('error',()=>{failed=true;stage.classList.remove('ready');controls.hidden=true;});
+ for(const event of ['play','pause','timeupdate','volumechange'])video.addEventListener(event,label);
+ const updateMotion=()=>{if(!narrating){requested=!reduced()&&!userPaused;sync();}};
+ motion.addEventListener('change',updateMotion);window.addEventListener('serengeti-motion',updateMotion);
+ window.addEventListener('serengeti-captions',e=>{captions=e.detail;updateCaption();});
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});
  new MutationObserver(sync).observe(modal,{attributes:true,attributeFilter:['open']});
  new MutationObserver(sync).observe(loading,{attributes:true,attributeFilter:['class']});
  document.addEventListener('visibilitychange',sync);
- reducedMotion.addEventListener('change',e=>{if(e.matches){requested=false;sync();}});
  sync();
  return {
-  pause(){requested=false;controller.transition('pause');video.pause();label();},
-  setSound(enabled){
-   sound=enabled;video.muted=!sound;video.volume=1;
-   label();
-  }
+  pause(){requested=false;userPaused=true;controller.transition('pause');video.pause();label();},
+  setSound(enabled){sound=enabled;if(!sound){narrating=false;video.loop=true;}video.muted=!sound||!narrating;video.volume=1;label();}
  };
 }
-
