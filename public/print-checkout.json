@@ -1,0 +1,5 @@
+{
+  "currency": "USD",
+  "fulfillment": { "ready": false, "shippingReady": false, "webhookReady": false },
+  "editions": {}
+}

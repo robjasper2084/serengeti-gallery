@@ -44,7 +44,7 @@ export function attachGalleryHUD({modal,pause,resume,onHelp}){
   button.onclick=()=>{close();$('#'+target).click();};$('.visit-actions').append(button);
  }
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden){event.preventDefault();close(true);}});
- window.addEventListener('serengeti-room',event=>{roomName.textContent=['Atrium','Art gallery','Cinema'][event.detail]||'Welcome!';document.querySelectorAll('.rooms [data-room]').forEach(button=>button.setAttribute('aria-current',Number(button.dataset.room)===event.detail?'location':'false'));close();});
+ window.addEventListener('serengeti-room',event=>{roomName.textContent=['Atrium','Art gallery','Cinema','Life & Light'][event.detail]||'Welcome!';document.querySelectorAll('.rooms [data-room]').forEach(button=>button.setAttribute('aria-current',Number(button.dataset.room)===event.detail?'location':'false'));close();});
  new MutationObserver(()=>{if(!document.body.classList.contains('exploring'))close();}).observe(document.body,{attributes:true,attributeFilter:['class']});
  $('#menu-nav').addEventListener('click',()=>close());
 }

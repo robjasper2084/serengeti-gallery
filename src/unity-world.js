@@ -5,10 +5,11 @@ import {createCinemaPlayer} from './cinema-player.js';
 export async function createUnityGallery({artworks,onArt,onRoom,toast,chess,onProgress=()=>{}}) {
  const profile=qualityProfile(readSaved('serengeti-quality','auto'),matchMedia('(pointer: coarse)').matches);
  const canvas=document.querySelector('#world');canvas.tabIndex=0;
- const response=await fetch('/serengeti-gallery/unity/build-manifest.json');if(!response.ok)throw Error('Unity build is not available');
+ const response=await fetch('/serengeti-gallery/unity/life-and-light-20261004.json');if(!response.ok)throw Error('Unity build is not available');
  const manifest=await response.json();
+ if(manifest.artworkCount!==artworks.length)throw Error('The native gallery and artwork catalog versions do not match');
  await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=manifest.loaderUrl;script.onload=resolve;script.onerror=()=>reject(Error('Unity loader failed'));document.head.appendChild(script);});
- const instance=await window.createUnityInstance(canvas,{...manifest.config,companyName:'Serengeti Gallery',productName:'Serengeti Gallery',productVersion:'1.1',matchWebGLToCanvasSize:true,devicePixelRatio:Math.min(devicePixelRatio,profile.ratio)},progress=>{onProgress(progress);});
+ const instance=await window.createUnityInstance(canvas,{...manifest.config,companyName:'Serengeti Gallery',productName:'Serengeti Gallery',productVersion:'1.2-life-light-20261004',matchWebGLToCanvasSize:true,devicePixelRatio:Math.min(devicePixelRatio,profile.ratio)},progress=>{onProgress(progress);});
  const readyProfile=qualityProfile(readSaved('serengeti-quality','auto'),matchMedia('(pointer: coarse)').matches);
  instance.Module.devicePixelRatio=Math.min(devicePixelRatio,readyProfile.ratio);
  instance.SendMessage('Playable portrait visitor','SetQuality',readyProfile.mode);
@@ -29,7 +30,7 @@ export async function createUnityGallery({artworks,onArt,onRoom,toast,chess,onPr
  const blocked=()=>document.querySelector('#modal').open||!document.querySelector('#menu').classList.contains('hidden')||['activities-open','together-open','chess-active'].some(c=>document.body.classList.contains(c));
  const resume=()=>send('SetPaused',document.body.classList.contains('exploring')&&!blocked()?'0':'1');
  document.body.classList.add('unity-ready');document.querySelector('#loading').classList.add('hidden');
- canvas.dataset.renderer='Unity WebGL';canvas.dataset.artworks='33';canvas.dataset.character='Circuit Suit curator';
+ canvas.dataset.renderer='Unity WebGL';canvas.dataset.artworks=String(artworks.length);canvas.dataset.character='Circuit Suit curator';
  window.addEventListener('serengeti-art',e=>onArt(Number(e.detail)));
  const cinemaSound=()=>cinema.setSound(document.querySelector('#sound').dataset.enabled==='true'&&document.querySelector('#sound').dataset.source==='cinema'&&!document.hidden);
  window.addEventListener('serengeti-sound',cinemaSound);

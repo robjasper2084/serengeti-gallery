@@ -8,7 +8,7 @@
 .exploring header #explore-nav:after{display:none}
 .exploring header button{min-height:48px}
 .exploring #mobile-nav{display:none!important}
-.exploring .rooms{position:fixed;inset:96px auto auto 50%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:350px;z-index:5;padding:5px;border:1px solid #d3b08077;border-radius:16px;background:#101511ed}
+.exploring .rooms{position:fixed;inset:96px auto auto 50%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:460px;z-index:5;padding:5px;border:1px solid #d3b08077;border-radius:16px;background:#101511ed}
 .exploring .rooms .room{min-height:48px;padding:10px 8px;font-size:14px;border:0;border-radius:11px;color:#eee7d8}
 .exploring .rooms .room span{display:none}
 .exploring .rooms .room.selected{background:#d4b47c;color:#191d18;font-weight:600}
