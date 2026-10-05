@@ -11,7 +11,7 @@ export function attachGalleryHUD({modal,pause,resume,onHelp}){
  const progress=$('#progress'),discovered=$('#visited');
  progress.replaceChildren();const roomName=document.createElement('strong');roomName.id='hud-room';roomName.textContent='Welcome!';
  progress.append(roomName,discovered);
- $('#hint').innerHTML='<span>Move with the stick</span><span>Drag the room to look</span>';
+ $('#hint').innerHTML='<span>Move with the stick / WASD</span><span>Drag the room to look 360°</span>';
  $('.visit-actions').setAttribute('role','group');$('.visit-actions').setAttribute('aria-label','Play controls');
  $('.rooms').setAttribute('role','navigation');$('.rooms').setAttribute('aria-label','Choose a place');
  const panel=document.createElement('aside');panel.id='gallery-activities';panel.hidden=true;

@@ -1,0 +1,13 @@
+{
+  "loaderUrl": "/serengeti-gallery/unity/Build/LifeAndLightControls.loader.js",
+  "config": {
+    "dataUrl": "/serengeti-gallery/unity/Build/LifeAndLightControls.data.unityweb",
+    "frameworkUrl": "/serengeti-gallery/unity/Build/LifeAndLightControls.framework.js.unityweb",
+    "codeUrl": "/serengeti-gallery/unity/Build/LifeAndLightControls.wasm.unityweb",
+    "streamingAssetsUrl": "/serengeti-gallery/unity/StreamingAssets"
+  },
+  "artworkCount": 54,
+  "exhibitionWorks": 21,
+  "contentVersion": "life-and-light-controls-20261004",
+  "downloadBytes": 60828387.0
+}

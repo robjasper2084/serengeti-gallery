@@ -73,6 +73,7 @@ public class GalleryVR:MonoBehaviour {
  bool cinema=transform.position.z>15.2f;if(inCinema&&!cinema)film?.Pause();inCinema=cinema;
  }
  void Select(RaycastHit hit){var piano=hit.collider.GetComponent<GalleryPianoTarget>();if(piano){piano.Select();return;}var chess=hit.collider.GetComponent<GalleryChessTarget>();if(chess){chess.Select();return;}var action=hit.collider.GetComponent<GalleryVRAction>();if(action){switch(action.action){case "art-prev":artPage--;ArtPage();break;case "art-next":artPage++;ArtPage();break;case "art-close":artPanel.gameObject.SetActive(false);break;case "play":ToggleFilm("");break;case "sound":FilmSound("1");break;case "mute":FilmSound("0");break;case "exit":WebXRManager.Instance.ToggleVR();break;default:GoRoom(action.action);break;}return;}
+ var portal=hit.collider.GetComponent("GalleryPortal");if(portal){var destination=portal.GetType().GetField("room");if(destination!=null)GoRoom(destination.GetValue(portal).ToString());return;}
  var artwork=hit.collider.GetComponent("GalleryArtwork");if(artwork){var field=artwork.GetType().GetField("index");if(field!=null)ShowArt((int)field.GetValue(artwork));return;}
  if(hit.normal.y>.85f&&hit.point.y<.5f){var p=hit.point+Vector3.up*.04f;if(!Physics.CheckCapsule(p+Vector3.up*.4f,p+Vector3.up*1.5f,.3f,~(1<<9),QueryTriggerInteraction.Ignore)){body.enabled=false;transform.position=p;body.enabled=true;PositionMenu();}}
  }

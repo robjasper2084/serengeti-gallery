@@ -2,7 +2,7 @@ import {readSaved,writeSaved} from './visitor-settings.js';
 export function attachFirstVisit({modal,close,onFinish=()=>{}}){
  const steps=[
   ['Move','Drag the round stick to walk. On a keyboard, use W A S D or the arrow keys.','ph-person-simple-walk'],
-  ['Look around','Drag across the room to look. The View button switches cameras.','ph-hand-swipe-right'],
+  ['Look around','Drag across the room to look all the way around. The hero faces where you walk. The View button switches cameras.','ph-hand-swipe-right'],
   ['Tap artwork','Tap a picture to discover its story. Activities has chess and piano. Lobby brings you home.','ph-image']
  ];
  let step=0;

@@ -16,9 +16,26 @@ function touchFixture(){
   originals.set(key,Object.getOwnPropertyDescriptor(globalThis,key));Object.defineProperty(globalThis,key,{configurable:true,value});
  }
  const calls=[];attachTouchNavigation({canvas,send:(...args)=>calls.push(args),resume(){}});
- const pointer=(target,type,id,x,y)=>target.dispatchEvent(Object.assign(new Event(type,{cancelable:true}),{pointerId:id,pointerType:'touch',clientX:x,clientY:y}));
+ const pointer=(target,type,id,x,y,pointerType='touch',button=0)=>target.dispatchEvent(Object.assign(new Event(type,{cancelable:true}),{pointerId:id,pointerType,button,clientX:x,clientY:y}));
  return{window,document,canvas,zone:document.body.child,modal,calls,pointer,openActivities(name='activities-open'){document.body.classes.add(name);observers.find(o=>o.target===document.body).callback();},openModal(){modal.open=true;observers.find(o=>o.target===modal).callback();},restore(){for(const [key,value]of originals)value?Object.defineProperty(globalThis,key,value):delete globalThis[key];}};
 }
+
+for(const pointerType of ['mouse','touch'])test(`${pointerType} drag rotates the camera continuously and stops on release`,()=>{
+ const f=touchFixture();try{
+  f.pointer(f.canvas,'pointerdown',2,100,200,pointerType);f.pointer(f.canvas,'pointermove',2,800,180,pointerType);f.pointer(f.canvas,'pointermove',2,20,300,pointerType);
+  assert.deepEqual(f.calls.slice(-2),[['LookTouch','700,-20'],['LookTouch','-780,120']]);
+  f.pointer(f.canvas,'pointerup',2,20,300,pointerType);const count=f.calls.length;f.pointer(f.canvas,'pointermove',2,50,50,pointerType);assert.equal(f.calls.length,count);
+ }finally{f.restore();}
+});
+
+test('one finger can move while another looks, without sharing pointer deltas',()=>{
+ const f=touchFixture();try{
+  f.pointer(f.zone,'pointerdown',1,20,20);f.pointer(f.canvas,'pointerdown',2,200,200);
+  f.pointer(f.zone,'pointermove',1,74,-34);f.pointer(f.canvas,'pointermove',2,240,180);
+  assert.deepEqual(f.calls.at(-1),['LookTouch','40,-20']);assert.ok(f.calls.some(([method,value])=>method==='SetJoystick'&&value==='0.707,0.707'));
+  f.pointer(f.canvas,'pointerup',2,240,180);f.pointer(f.zone,'pointermove',1,-34,20);assert.deepEqual(f.calls.at(-1),['SetJoystick','-1.000,0.000']);
+ }finally{f.restore();}
+});
 
 for(const event of ['orientationchange','resize'])test(`${event} releases movement and look pointers without retaining a held direction`,()=>{
  const f=touchFixture();try{

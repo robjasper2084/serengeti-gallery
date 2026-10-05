@@ -26,7 +26,19 @@ public static class GalleryExhibitionBuilder {
   }
   var caption=Label(item.title+"\n"+item.credit,p+Quaternion.Euler(0,yaw,0)*new Vector3(0,-h/2-.22f,-.05f),.019f,yaw);
  }
- static void Portal(string name,Vector3 p,float yaw,int room){var portal=Box(name,p,new Vector3(2.4f,1.05f,.12f),ink);portal.transform.rotation=Quaternion.Euler(0,yaw,0);portal.AddComponent<GalleryPortal>().room=room;Label(name,p+Quaternion.Euler(0,yaw,0)*Vector3.back*.08f,.05f,yaw);}
+ static void Doorway(string name,string title,string subtitle,Vector3 p,float yaw,int room,Texture preview){
+  var doorway=new GameObject(name).transform;doorway.SetParent(root);doorway.position=p;doorway.rotation=Quaternion.Euler(0,yaw,0);
+  var glow=new Material(Shader.Find("Unlit/Color"));glow.color=new Color(1,.77f,.38f);
+  foreach(float side in new[]{-1f,1f}){
+   var post=Box("Doorway brass pier",Vector3.zero,new Vector3(.22f,3.25f,.4f),brass);post.transform.SetParent(doorway,false);post.transform.localPosition=new Vector3(side*1.42f,1.625f,0);
+   var strip=Box("Doorway warm light",Vector3.zero,new Vector3(.045f,3.1f,.44f),glow,false);strip.transform.SetParent(doorway,false);strip.transform.localPosition=new Vector3(side*1.28f,1.55f,0);
+  }
+  var lintel=Box(title,Vector3.zero,new Vector3(3.08f,.66f,.4f),ink);lintel.transform.SetParent(doorway,false);lintel.transform.localPosition=new Vector3(0,3.55f,0);lintel.AddComponent<GalleryPortal>().room=room;
+  var threshold=Box("Level doorway threshold",Vector3.zero,new Vector3(2.6f,.03f,.7f),brass,false);threshold.transform.SetParent(doorway,false);threshold.transform.localPosition=new Vector3(0,.025f,0);
+  if(preview){var picture=GameObject.CreatePrimitive(PrimitiveType.Quad);picture.name="Doorway exhibition preview";picture.transform.SetParent(doorway,false);picture.transform.localPosition=new Vector3(0,1.8f,.28f);picture.transform.localScale=new Vector3(2.5f,2.5f*preview.height/preview.width,1);Object.DestroyImmediate(picture.GetComponent<Collider>());var mat=new Material(Shader.Find("Unlit/Texture"));mat.mainTexture=preview;picture.GetComponent<Renderer>().sharedMaterial=mat;}
+  var trigger=new GameObject("Walk through "+title);trigger.transform.SetParent(doorway,false);trigger.transform.localPosition=new Vector3(0,1.45f,-.15f);var col=trigger.AddComponent<BoxCollider>();col.isTrigger=true;col.size=new Vector3(2.5f,2.9f,.8f);trigger.AddComponent<GalleryDoor>().room=room;trigger.AddComponent<GalleryPortal>().room=room;
+  var rotation=doorway.rotation;Label(title,p+rotation*new Vector3(0,3.64f,-.23f),.050f,yaw);Label(subtitle,p+rotation*new Vector3(0,3.36f,-.23f),.023f,yaw);Label("WALK THROUGH / TAP TO ENTER",p+rotation*new Vector3(0,.65f,-.65f),.028f,yaw);
+ }
  public static void Build(){
   // Release from a separate scene: keep older local photography work recoverable.
   var source=EditorSceneManager.OpenScene("Assets/Scenes/Serengeti.unity");
@@ -61,17 +73,23 @@ public static class GalleryExhibitionBuilder {
   Label("COMPANIONS & PLACES",new Vector3(45,4.35f,10.7f),.065f);
   Label("ABSTRACT ENERGY",new Vector3(56.7f,4.4f,0),.065f,90);
   foreach(float x in new[]{39f,51f})foreach(float z in new[]{-5f,5f}){var lamp=new GameObject("Exhibition warm light").AddComponent<Light>();lamp.transform.SetParent(root);lamp.transform.position=new Vector3(x,4.5f,z);lamp.type=LightType.Point;lamp.range=15;lamp.intensity=1.5f;lamp.color=new Color(1,.9f,.74f);lamp.shadows=LightShadows.None;}
-  Portal("Return to gallery",new Vector3(56.72f,2.2f,6),90,0);
-  Portal("Life & Light photography",new Vector3(16,2.2f,11),0,3);
+  // West wall beside chess: aligned with the visitor's marked shadowed panel.
+  Doorway("Life & Light entrance doorway","LIFE & LIGHT","21 ORIGINAL WORKS / PHOTO GALLERY",new Vector3(-19.35f,0,5.85f),270,3,AssetDatabase.LoadAssetAtPath<Texture2D>(catalog.items[4].texture));
+  Doorway("Life & Light return doorway","ATRIUM","RETURN TO THE MAIN GALLERY",new Vector3(54.2f,0,6),90,0,null);
   Label("eyefilmlife: Detroit, Life & Light\n21 artist-supplied works | Original credits preserved",new Vector3(45,4.75f,-10.68f),.035f,180);
+  // Static captions belong in the world: labels behind a doorway must not bleed through it.
+  foreach(var text in Object.FindObjectsByType<TextMesh>(FindObjectsSortMode.None)){
+   var label=text.GetComponent<GalleryWorldLabel>();if(!label)label=text.gameObject.AddComponent<GalleryWorldLabel>();label.Refresh();
+  }
   Physics.SyncTransforms();var floor=GameObject.Find("Exhibition solid floor").GetComponent<Collider>();if(!floor.Raycast(new Ray(new Vector3(45,2,1f),Vector3.down),out var hit,3))throw new System.Exception("Exhibition spawn floor missing");
   if(root.GetComponentsInChildren<GalleryArtwork>().Length!=21)throw new System.Exception("Expected 21 exhibition displays");
   var complete=Object.FindObjectsByType<GalleryArtwork>(FindObjectsSortMode.None).OrderBy(a=>a.index).ToArray();
   if(complete.Length!=54||!complete.Select(a=>a.index).SequenceEqual(Enumerable.Range(0,54)))throw new System.Exception("Expected exactly 54 unique displayed artwork indices");
   for(int i=0;i<original.Length;i++)if(original[i].transform.position!=originalPositions[i])throw new System.Exception("Existing artwork moved");
+  GalleryMovementValidation.Run();
   EditorSceneManager.MarkSceneDirty(root.gameObject.scene);EditorSceneManager.SaveOpenScenes();AssetDatabase.SaveAssets();
   PlayerSettings.WebGL.compressionFormat=WebGLCompressionFormat.Brotli;PlayerSettings.WebGL.decompressionFallback=true;PlayerSettings.WebGL.dataCaching=true;
-  var result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/LifeAndLight.unity"},locationPathName="Builds/LifeAndLight",target=BuildTarget.WebGL});
+  var result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/LifeAndLight.unity"},locationPathName="Builds/LifeAndLightControls",target=BuildTarget.WebGL});
   if(result.summary.result!=BuildResult.Succeeded)throw new System.Exception("Exhibition WebGL build failed");
   Debug.Log("LIFE_AND_LIGHT_BUILD_SUCCESS original=33 added=21 total=54 unique indices; preserved existing positions; verified solid spawn floor");
  }
