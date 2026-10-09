@@ -1,5 +1,6 @@
 import {createArrivalBubbleTimers} from './arrival-bubbles.js';
 import {readSaved} from './visitor-settings.js';
+import {fitArrivalPhoto} from './arrival-photo-layout.js';
 
 export function attachArrivalInteractions({enterGallery}){
  const arrival=document.querySelector('#arrival'),image=document.querySelector('#atrium-image');
@@ -7,10 +8,10 @@ export function attachArrivalInteractions({enterGallery}){
  const portrait=document.querySelector('#portrait-info'),cinema=document.querySelector('#watch');
  portrait.querySelector('span').textContent='Meet the portrait ↗';
  cinema.querySelector('span').textContent='Enter cinema ↗';
- // Anchor hit areas to the actual cover-cropped photograph at every screen size.
+ // Anchor hit areas to the rendered photograph, including contain-mode letterboxing.
  const areas=[[portrait,[160,145,315,500]],[entrance,[510,330,370,330]],[cinema,[1110,280,335,405]]];
  const hero=document.querySelector('.hero'),portraitLabel=portrait.querySelector('span');
- function fit(){const w=arrival.clientWidth,h=arrival.clientHeight,s=Math.max(w/1536,h/1024);const [px,py]=getComputedStyle(image).objectPosition.split(' ').map(v=>parseFloat(v)/100);const ox=(w-1536*s)*px,oy=(h-1024*s)*py;for(const [button,[x,y,width,height]]of areas){Object.assign(button.style,{left:`${ox+x*s}px`,top:`${oy+y*s}px`,width:`${width*s}px`,height:`${height*s}px`,right:'auto'});}
+ function fit(){const {scale:s,x:ox,y:oy}=fitArrivalPhoto(arrival.clientWidth,arrival.clientHeight,getComputedStyle(image));for(const [button,[x,y,width,height]]of areas){Object.assign(button.style,{left:`${ox+x*s}px`,top:`${oy+y*s}px`,width:`${width*s}px`,height:`${height*s}px`,right:'auto'});}
   // Keep the portrait action above the intro card on shorter desktop screens.
   portraitLabel.style.bottom='12px';
   if(hero&&getComputedStyle(portrait).display!=='none'){

@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "codes:generate": "node scripts/generate-artwork-codes.mjs",
     "dev": "vite --configLoader native --host 0.0.0.0 --port 8205",
     "build": "vite build --configLoader native",
     "preview": "vite preview --configLoader native --host 0.0.0.0 --port 8205",
@@ -19,6 +20,8 @@
     "vite": "^7.1.0"
   },
   "devDependencies": {
-    "@resvg/resvg-js": "^2.6.2"
+    "@resvg/resvg-js": "^2.6.2",
+    "jsqr": "1.4.0",
+    "qrcode": "1.5.4"
   }
 }

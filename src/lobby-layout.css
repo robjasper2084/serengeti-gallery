@@ -1,0 +1,128 @@
+/* The lobby remains a photograph with its original media and doorway overlays.
+   Touch input alone must never replace the iPad lobby with a card dashboard. */
+#arrival #cinema-teaser-stage{position:absolute;inset:0 auto auto 0!important;width:1536px;height:1024px;z-index:2;pointer-events:none}
+#arrival #cinema-teaser-stage video{position:absolute;left:0;top:0;width:1280px;height:720px;object-fit:fill}
+.website-view-control{display:grid;gap:8px;padding:14px 0;border-bottom:1px solid var(--line);font-size:13px}
+.website-view-control select{width:100%;min-height:44px;padding:8px 10px;background:#1d211b;color:#fff2d6;border:1px solid #a58754;border-radius:5px;font:16px Arial,sans-serif}
+#menu{z-index:40}
+
+/* A saved mobile choice also works on large tablets and desktop monitors. */
+body[data-lobby-layout="mobile"]:not(.exploring){--gallery-header:calc(112px + var(--safe-top));--gallery-footer:calc(64px + var(--safe-bottom))}
+body[data-lobby-layout="mobile"]:not(.exploring) header{height:var(--gallery-header);display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:64px 44px;padding:var(--safe-top) 12px 4px;gap:0 8px}
+body[data-lobby-layout="mobile"]:not(.exploring) header .brand{height:48px;min-width:0;padding:0;margin:0;border:0;align-items:flex-start}
+body[data-lobby-layout="mobile"]:not(.exploring) header .brand strong{font-size:clamp(16px,3.7vw,24px);letter-spacing:.6px}
+body[data-lobby-layout="mobile"]:not(.exploring) header .brand small{display:none}
+body[data-lobby-layout="mobile"]:not(.exploring) header .header-tools{gap:4px;margin:0}
+body[data-lobby-layout="mobile"]:not(.exploring) header .header-tools button{min-width:44px;min-height:44px;width:44px;height:44px;margin:0;padding:0}
+body[data-lobby-layout="mobile"]:not(.exploring) header #search-nav,body[data-lobby-layout="mobile"]:not(.exploring) header #vr{display:none}
+body[data-lobby-layout="mobile"]:not(.exploring) header nav[aria-label='Main navigation']{position:static;grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));height:44px;gap:8px;background:none}
+body[data-lobby-layout="mobile"]:not(.exploring) header nav button{height:44px;min-width:0;font-size:14px}
+body[data-lobby-layout="mobile"]:not(.exploring) .menu-panel{top:calc(var(--gallery-header) + 8px);max-height:calc(100dvh - var(--gallery-header) - 24px);overflow:auto}
+
+
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival{display:contents}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#arrival{position:fixed;inset:0;width:100%;height:100%;aspect-ratio:auto;border:0;border-radius:0}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival .scene-hotspot{display:block}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#arrival-quick{display:none}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>.hero{position:fixed;inset:auto auto 24px 24px;width:310px;max-width:calc(100% - 48px);height:auto;padding:20px;background:var(--panel);border:1px solid #bc945e;border-radius:6px;box-shadow:0 8px 25px #0002}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival .hero h1{font-size:28px;max-width:calc(100% - 42px);margin:0 0 8px}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival .hero .arrival-description{font-size:12px;line-height:1.5;margin:0;letter-spacing:0}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival .hero #discover-story{min-height:44px;margin-top:12px;padding:10px 14px;font-size:14px}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival .hero .round-button{top:20px;right:12px!important;width:40px;height:40px}
+ body:not([data-lobby-layout="wide"]):not(.exploring) .lobby-options{margin:10px 0 0}
+ body:not([data-lobby-layout="wide"]):not(.exploring) .lobby-options label{font-size:10px;flex-wrap:nowrap}
+ body:not([data-lobby-layout="wide"]):not(.exploring) .lobby-options select{min-height:44px;font-size:16px;padding:6px}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#portrait-controls{position:fixed;inset:auto 24px 86px auto;display:flex;gap:8px;width:auto;min-width:0}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#portrait-controls button{width:auto;min-height:44px;padding:8px 10px;font-size:11px;white-space:nowrap}
+ body:not([data-lobby-layout="wide"]):not(.exploring) .bottom{inset:auto 24px 24px auto;display:flex;gap:14px;width:auto;height:48px;padding:0 12px}
+ body:not([data-lobby-layout="wide"]):not(.exploring) .bottom button{min-height:44px;padding:0;font-size:12px;gap:8px}
+ body:not([data-lobby-layout="wide"]):not(.exploring) .bottom button:first-child{padding:0 14px 0 0}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#cinema-teaser-controls{position:fixed;inset:auto 6% 32% auto!important;display:flex;width:auto;max-width:none;padding:3px;background:#0d1412ef;border:1px solid #a58754;border-radius:7px;box-shadow:0 8px 30px #0005}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#cinema-teaser-controls h2{display:none}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival #cinema-teaser-controls .teaser-actions{display:flex;width:auto;gap:0}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival #cinema-teaser-controls .teaser-actions:after{content:none}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#cinema-teaser-controls button{min-height:44px;padding:8px 10px;background:none;border:0;font-size:11px}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#cinema-teaser-controls #teaser-enter{width:auto;margin:0;border-left:1px solid #c3a57644}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#cinema-teaser-controls #teaser-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ body:not([data-lobby-layout="wide"]):not(.exploring) .compact-label{display:inline}body:not([data-lobby-layout="wide"]):not(.exploring) .touch-label{display:none}
+ body:not([data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#welcome-caption{position:fixed;inset:auto 16px 145px;transform:none;margin:auto;width:max-content;max-width:calc(100% - 32px)}
+
+
+/* Full-width desktop navigation on tablets, including portrait iPads. */
+
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active){--gallery-header:calc(64px + var(--safe-top));--gallery-footer:0px}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header{height:var(--gallery-header);display:flex;flex-wrap:nowrap;gap:14px;padding:var(--safe-top) 16px 0;}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header .brand{height:44px;padding:0 14px 0 0;margin:0;border-right:1px solid var(--line);align-items:center;min-width:0}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header .brand strong{font-size:clamp(18px,2.1vw,28px);white-space:nowrap;letter-spacing:1px}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header .brand small{display:block;align-self:center;font-size:7px;letter-spacing:5px}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header nav[aria-label='Main navigation']{position:static;display:flex;gap:clamp(12px,2vw,32px);height:48px;background:none}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header nav button{font-size:12px;min-height:44px}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header nav button.active:after{bottom:4px;left:0;right:0}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header .header-tools{gap:4px;margin-left:auto}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header .header-tools button{min-width:44px;width:44px;height:44px;min-height:44px;padding:0;margin:0}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header #search-nav{display:grid}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header #vr{display:flex;font-size:0;min-width:44px;width:44px;border:1px solid var(--line);border-radius:6px;gap:0}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header .header-tools #together-launch{min-width:44px!important;width:44px!important;height:44px;padding:0!important;justify-content:center}
+ body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header .friend-label,body[data-lobby-layout="desktop"]:not(.exploring):not(.chess-active) header .friend-online{display:none}
+
+
+ body[data-lobby-layout="desktop"]:not(.exploring) #responsive-arrival>#arrival{inset:var(--gallery-header) 0 auto;height:calc(100dvh - var(--gallery-header));background:#12110e}
+ body[data-lobby-layout="desktop"]:not(.exploring) #responsive-arrival #atrium-image{object-fit:contain}
+ body[data-lobby-layout="desktop"]:not(.exploring) #responsive-arrival>#cinema-teaser-controls{bottom:26%!important}
+
+
+/* Upright phones show the whole photograph, then a compact invitation.
+   The screen and portrait remain part of the photo, never separate video cards. */
+
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival{position:fixed;inset:var(--gallery-header) 0 var(--gallery-footer);display:flex;flex-direction:column;gap:12px;padding:0 0 16px;overflow-y:auto;overflow-x:hidden;background:#12110e}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival>#arrival{position:relative;inset:auto;flex:none;width:100%;height:auto;aspect-ratio:3/2;order:0}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival #atrium-image{object-fit:contain;object-position:center}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival>.hero{position:relative;inset:auto;flex:none;order:2;width:calc(100% - 24px);max-width:none;margin:0 12px;padding:16px}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival .hero h1{font-size:27px;margin-bottom:6px}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival .hero .round-button{top:12px}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival>.hero .arrival-description{font-size:13px;max-width:34ch}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival>#portrait-controls{position:static;order:3;display:flex;justify-content:center;gap:8px;flex:none;margin:0 12px}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival>#portrait-controls button{flex:1;min-height:44px;font-size:11px}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival>#cinema-teaser-controls{position:relative;inset:auto!important;order:1;align-self:flex-end;margin:-6px 12px 0;padding:0;box-shadow:none}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival>#cinema-teaser-controls #teaser-enter{font-size:12px}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival .compact-label{display:none}body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival .touch-label{display:inline}
+ body[data-lobby-layout="mobile"]:not(.exploring) .bottom{inset:auto 12px max(8px,var(--safe-bottom));display:grid;grid-template-columns:1fr 1.4fr;width:auto;gap:0;padding:0}
+ body[data-lobby-layout="mobile"]:not(.exploring) .bottom button{justify-content:center}
+ body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival>#welcome-caption{position:static;order:4;flex:none;width:calc(100% - 24px);margin:0 12px}
+ body[data-lobby-layout="mobile"]:not(.exploring) #arrival .scene-hotspot span{min-height:40px;padding:10px 7px;font-size:10px}
+ body[data-lobby-layout="mobile"]:not(.exploring) #arrival #arrival-enter span{display:none}
+
+/* Short landscape phones retain the complete photo beside the controls. */
+
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring):not(.chess-active){--gallery-header:56px;--gallery-footer:0px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) header{height:56px;grid-template-rows:56px;padding-top:0;gap:8px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) header .brand strong{font-size:15px}body[data-lobby-layout="mobile-landscape"]:not(.exploring) header .brand small{display:none}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) header nav[aria-label='Main navigation']{height:44px;gap:12px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival{position:fixed;inset:56px auto 60px 0;display:flex;flex-direction:column;width:232px;gap:6px;padding:8px;overflow-y:auto;overflow-x:hidden;background:#12110e}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival>#arrival{inset:56px 0 0 232px;width:calc(100% - 232px);height:calc(100dvh - 56px);background:#12110e}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival #atrium-image{object-fit:contain;object-position:center}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival>.hero{position:relative;inset:auto;flex:none;order:1;width:216px;max-width:none;padding:12px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival .hero h1{font-size:20px;max-width:none}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival .hero .arrival-description{font-size:11px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival .hero .round-button{display:none}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival .hero #discover-story{min-height:44px;margin-top:8px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) .lobby-options{margin-top:6px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) .lobby-options select{min-height:36px;font-size:16px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival>#portrait-controls{position:static;flex:none;order:2;gap:4px;width:216px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival>#portrait-controls button{flex:1;font-size:9px;padding:5px;min-height:40px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) .bottom{inset:auto auto 8px 8px;width:216px;gap:8px;padding:0 8px;height:44px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) .bottom button:first-child{padding-right:8px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) .bottom .sound-copy strong{font-size:10px}body[data-lobby-layout="mobile-landscape"]:not(.exploring) .bottom .sound-copy small{font-size:9px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival>#cinema-teaser-controls{inset:auto 12px 8px auto!important}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #arrival .scene-hotspot span{font-size:10px;padding:10px 8px;min-height:40px}
+ body[data-lobby-layout="mobile-landscape"]:not(.exploring) #responsive-arrival>#welcome-caption{left:240px;bottom:64px;max-width:calc(100% - 256px)}
+
+/* Center the mobile layout on larger screens without stretching its controls. */
+body[data-lobby-layout="mobile"]:not(.exploring) #responsive-arrival{width:min(600px,100%);margin-inline:auto}
+body[data-lobby-layout="mobile"]:not(.exploring) .bottom{max-width:576px;margin-inline:auto}
+
+/* An explicitly selected desktop view still fits a narrow window or split screen. */
+@media(max-width:699px){
+ body[data-lobby-layout="desktop"]:not(.exploring) #app{position:fixed;inset:0 auto auto 0;width:960px;height:var(--desktop-view-height);transform:scale(var(--desktop-view-scale));transform-origin:top left}
+ body[data-lobby-layout="desktop"]:not(.exploring) #responsive-arrival>#arrival{height:calc(var(--desktop-view-height) - var(--gallery-header))}
+}

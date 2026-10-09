@@ -1,5 +1,6 @@
 import {projectiveTransform} from './projective-transform.js';
 import {readSaved} from './visitor-settings.js';
+import {fitArrivalPhoto} from './arrival-photo-layout.js';
 
 // Inside corners of the cinema screen in the 1536 x 1024 arrival photograph.
 const corners=[[1249,416],[1441,385],[1441,548],[1249,569]];
@@ -17,7 +18,7 @@ export function createCinemaTeaser({enterCinema}){
  let requested=!reduced()&&!saveData(),userPaused=false;
  let inView=typeof IntersectionObserver==='undefined';
  const visible=()=>inView&&!document.hidden&&!document.body.classList.contains('exploring')&&!document.querySelector('#modal').open;
- function fit(){const {width,height}=arrival.getBoundingClientRect(),scale=Math.max(width/1536,height/1024);const [px,py]=getComputedStyle(image).objectPosition.split(' ').map(n=>parseFloat(n)/100);stage.style.transform=`translate(${(width-1536*scale)*px}px,${(height-1024*scale)*py}px) scale(${scale})`;panel.classList.toggle('compact-preview',width<700);}
+ function fit(){const {scale,x,y}=fitArrivalPhoto(arrival.clientWidth,arrival.clientHeight,getComputedStyle(image));stage.style.transform=`translate(${x}px,${y}px) scale(${scale})`;panel.classList.toggle('compact-preview',arrival.clientWidth<700);}
  new ResizeObserver(fit).observe(arrival);image.addEventListener('load',fit);fit();
  function label(){const action=video.paused?'Play trailer':'Pause trailer';play.textContent=video.paused?'▶':'Ⅱ';play.setAttribute('aria-label',action);play.title=action;play.setAttribute('aria-pressed',String(!video.paused));mute.textContent=video.muted?'Sound off':'Sound on';mute.setAttribute('aria-pressed',String(!video.muted));mute.setAttribute('aria-label',video.muted?'Turn trailer sound on':'Mute trailer');}
  function pause(){requested=false;video.pause();label();}

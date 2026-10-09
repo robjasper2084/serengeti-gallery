@@ -1,5 +1,7 @@
+import {attachWebsiteView} from './website-view.js';
 // Reuse the real gallery controls; desktop keeps its original composition.
 export function attachResponsiveGallery() {
+ attachWebsiteView();
  const app=document.querySelector('#app');
  const arrival=document.createElement('section');arrival.id='responsive-arrival';arrival.setAttribute('aria-label','Gallery arrival');arrival.tabIndex=0;
  app.append(arrival);
@@ -8,15 +10,9 @@ export function attachResponsiveGallery() {
  }
  const trailer=document.querySelector('#cinema-teaser');
  trailer.poster=document.querySelector('#atrium-image').src;
- // Desktop media stays in the photograph's layer, below its doorway buttons.
- // Touch layouts give the trailer its own full-width card.
+ // Keep the trailer inside the photographed cinema on every device.
  const preview=document.querySelector('#cinema-teaser-stage');
- const touchLayout=matchMedia('(max-width:1100px), (pointer:coarse), (max-aspect-ratio:1/1)');
- const positionPreview=()=>{
-  if(touchLayout.matches)document.querySelector('#cinema-teaser-controls').before(preview);
-  else document.querySelector('#watch').before(preview);
- };
- positionPreview();touchLayout.addEventListener('change',positionPreview);
+ document.querySelector('#watch').before(preview);
  const cinemaEnter=document.querySelector('#teaser-enter');
  cinemaEnter.innerHTML='<span class="compact-label">Enter ↗</span><span class="touch-label">Enter cinema ↗</span>';
 

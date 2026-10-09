@@ -1,6 +1,7 @@
 import {projectiveTransform} from './projective-transform.js';
 import {readSaved} from './visitor-settings.js';
 import {LivingPortraitController} from './living-portrait-controller.js';
+import {fitArrivalPhoto} from './arrival-photo-layout.js';
 // Inside corners of the gold frame in the 1536 x 1024 atrium photograph.
 const corners = [[176,100],[468,177],[460,619],[164,632]];
 export function createPortraitWelcome() {
@@ -38,9 +39,8 @@ export function createPortraitWelcome() {
   updateCaption();
  }
  function fit() {
-  const {width,height}=arrival.getBoundingClientRect(),scale=Math.max(width/1536,height/1024);
-  const [px,py]=getComputedStyle(image).objectPosition.split(' ').map(n=>parseFloat(n)/100);
-  stage.style.transform=`translate(${(width-1536*scale)*px}px,${(height-1024*scale)*py}px) scale(${scale})`;
+  const {scale,x,y}=fitArrivalPhoto(arrival.clientWidth,arrival.clientHeight,getComputedStyle(image));
+  stage.style.transform=`translate(${x}px,${y}px) scale(${scale})`;
  }
  new ResizeObserver(fit).observe(arrival);image.addEventListener('load',fit);fit();
  function cancelDelay(){if(delay!==null){clearTimeout(delay);delay=null;}}
