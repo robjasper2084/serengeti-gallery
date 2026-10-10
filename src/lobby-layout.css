@@ -70,6 +70,12 @@ body[data-lobby-layout="mobile"]:not(.exploring) .menu-panel{top:calc(var(--gall
  body[data-lobby-layout="desktop"]:not(.exploring) #responsive-arrival #atrium-image{object-fit:contain}
  body[data-lobby-layout="desktop"]:not(.exploring) #responsive-arrival>#cinema-teaser-controls{bottom:26%!important}
 
+/* Landscape desktop and tablet lobbies fill the space below navigation. */
+@media(min-aspect-ratio:1/1){
+ body:is([data-lobby-layout="desktop"],[data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#arrival{inset:var(--gallery-header,80px) 0 0;height:calc(100dvh - var(--gallery-header,80px));width:100%}
+ body:is([data-lobby-layout="desktop"],[data-lobby-layout="wide"]):not(.exploring) #responsive-arrival #atrium-image{object-fit:cover;object-position:center}
+}
+
 
 /* Upright phones show the whole photograph, then a compact invitation.
    The screen and portrait remain part of the photo, never separate video cards. */
