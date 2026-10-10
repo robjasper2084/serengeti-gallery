@@ -1,4 +1,5 @@
 import {createCinemaTeaser} from './cinema-teaser.js';
+import {attachArrivalLights} from './arrival-lights.js';
 import {createPassport} from './passport.js';
 import {createCloudPassport} from './cloud-passport.js';
 import {attachHTMLCinema} from './html-cinema.js';
@@ -165,6 +166,7 @@ createCinemaTeaser({enterCinema:openCinema});
 // Build the responsive layout before observers begin preview playback.
 attachArrivalInteractions({enterGallery:()=>world.arrive()});
 attachResponsiveGallery();
+attachArrivalLights();
 attachGalleryHUD({modal,pause:()=>world.stop(),resume:()=>runtime?.resume(),onHelp:()=>tutorial.open()});
 galleryAudio.sync();
 

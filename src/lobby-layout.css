@@ -72,8 +72,8 @@ body[data-lobby-layout="mobile"]:not(.exploring) .menu-panel{top:calc(var(--gall
 
 /* Landscape desktop and tablet lobbies fill the space below navigation. */
 @media(min-aspect-ratio:1/1){
- body:is([data-lobby-layout="desktop"],[data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#arrival{inset:var(--gallery-header,80px) 0 0;height:calc(100dvh - var(--gallery-header,80px));width:100%;--arrival-photo-zoom:1.12}
- body:is([data-lobby-layout="desktop"],[data-lobby-layout="wide"]):not(.exploring) #responsive-arrival #atrium-image{object-fit:cover;object-position:center;transform:scale(var(--arrival-photo-zoom));transform-origin:center}
+ body:is([data-lobby-layout="desktop"],[data-lobby-layout="wide"]):not(.exploring) #responsive-arrival>#arrival{inset:var(--gallery-header,80px) 0 0;height:calc(100dvh - var(--gallery-header,80px));width:100%}
+ body:is([data-lobby-layout="desktop"],[data-lobby-layout="wide"]):not(.exploring) #responsive-arrival #atrium-image{object-fit:cover;object-position:center}
 }
 
 
