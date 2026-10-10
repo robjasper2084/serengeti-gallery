@@ -9,7 +9,8 @@ const records=JSON.parse(await readFile(new URL('./artwork-codes.json',import.me
 test('every supplied artwork has a distinct public QR destination',async()=>{
  const supplied=JSON.parse(await readFile(new URL('./gallery-submissions.json',import.meta.url),'utf8'));
  const exhibition=JSON.parse(await readFile(new URL('./life-and-light.json',import.meta.url),'utf8'));
- const ids=['archive',...supplied.map(a=>a.id),...exhibition.map(a=>a.id)];
+ const additions=JSON.parse(await readFile(new URL('./new-artworks.json',import.meta.url),'utf8'));
+ const ids=['archive',...supplied.map(a=>a.id),...exhibition.map(a=>a.id),...additions.map(a=>a.id)];
  assert.deepEqual(records.map(a=>a.id),ids);assert.equal(new Set(records.map(a=>a.url)).size,ids.length);
  for(const record of records){assert.equal(record.url,artworkPermalink(record.id));assert.equal(new URL(record.url).searchParams.size,1);}
 });

@@ -28,6 +28,8 @@ import {createPortraitWelcome} from './portrait-welcome.js';
 import museumWorks from './museum-collection.json';
 import submittedWorks from './gallery-submissions.json';
 import lifeAndLightWorks from './life-and-light.json';
+import newWorks from './new-artworks.json';
+import {editionPrices,restoreSubmittedPrices} from './artwork-pricing.js';
 import {attachLifeAndLight,exhibitionBanner} from './life-and-light.js';
 const $=s=>document.querySelector(s);
 $('#app').innerHTML=`<canvas id="world" aria-label="Interactive Serengeti Gallery. Use W A S D or arrow keys to walk, drag to look, or choose the movement controls."></canvas><div id="shade"></div>
@@ -53,6 +55,9 @@ for(const work of submittedWorks)artworks[work.slot]=work;
 // No reference or prototype study is offered for sale before owner approval.
 for(const work of artworks){work.displayOnly=true;}
 artworks.push(...lifeAndLightWorks);
+artworks.push(...newWorks);
+restoreSubmittedPrices([...submittedWorks,...lifeAndLightWorks,...newWorks]);
+const portraitPrices=document.createElement('button');portraitPrices.id='portrait-prices';portraitPrices.className='portrait-prices';portraitPrices.textContent=editionPrices(artworks[0])+' ↗';portraitPrices.setAttribute('aria-label','View The Living Portrait prices');document.querySelector('.hero h1').after(portraitPrices);portraitPrices.onclick=()=>showArt(0);
 artworks[0].subtitle='Supplied portrait · exhibition reference';
 artworks[0].note='Supplied reference for this prototype. No sale or biography is implied.';
 const passportStorage={getItem:k=>localStorage.getItem(k),setItem:(k,v)=>localStorage.setItem(k,v)};
@@ -89,7 +94,7 @@ function showArt(i){const a=artworks[i];encounters.add(i);writeSaved("serengeti-
  const save=document.createElement('button');save.className='outline-small';save.id='save-art';save.textContent=passport.has(a.id)?'Saved artwork ♥':'Save artwork ♡';save.setAttribute('aria-pressed',String(passport.has(a.id)));$('#walk-gallery').before(save);save.onclick=async()=>{const result=passport.toggle(a.id);save.textContent=result.saved?'Saved artwork ♥':'Save artwork ♡';save.setAttribute('aria-pressed',String(result.saved));toast(result.persisted?(result.saved?'Saved to your passport.':'Removed from saved artworks.'):'Saved for this visit. Browser storage is unavailable.');if(cloudPassport)try{await(result.saved?cloudPassport.save(a.id):cloudPassport.remove(a.id));}catch{toast('Saved locally; cloud sync could not finish.');}};
  if($('#add'))$('#add').onclick=()=>{const format=$('#format').value;if(bag.some(x=>x.id===a.id&&x.format===format)){toast('This edition is already in your bag.');return;}bag.push({id:a.id,format});updateBag();$('#add').textContent='Added to collection';toast('Added to your collection bag');};
 }
-function cards(list){return list.map(({a,i})=>`<button data-art="${i}"><img loading="lazy" src="${a.image}" alt="${escape(a.title)}"><h3>${escape(a.title)}</h3>${Number.isFinite(a.digital)?`<p class="artwork-card-price">Digital $${a.digital} · Print $${a.physical}</p>`:''}<small>${a.displayOnly?'Explore artwork':'Discover editions'} ↗</small></button>`).join('');}
+function cards(list){return list.map(({a,i})=>`<button data-art="${i}"><img loading="lazy" src="${a.image}" alt="${escape(a.title)}"><h3>${escape(a.title)}</h3>${editionPrices(a)?`<p class="artwork-card-price">${editionPrices(a)}</p>`:''}<small>${a.displayOnly?'Explore artwork':'Discover editions'} ↗</small></button>`).join('');}
 function wireCards(){document.querySelectorAll('[data-art]').forEach(b=>b.onclick=()=>showArt(Number(b.dataset.art)));}
 function collection(search=false){modal(`<div class="list-panel"><div class="caption">${artworks.length} WORKS · A WORLD OF PERSPECTIVES</div><h2 class="panel-title">The collection</h2>${exhibitionBanner()}${search?'<label class="search-field"><i class="ph-light ph-magnifying-glass" aria-hidden="true"></i><input id="collection-search" placeholder="Search by title or artist" aria-label="Search artworks"></label>':''}<p class="search-count" id="search-count">${artworks.length} works on view · Detroit, Life & Light now open</p><div class="catalog" id="catalog">${cards(catalogWorks)}</div></div>`);wireCards();exhibition.wire();if(search){$('#collection-search').focus();$('#collection-search').oninput=e=>{const q=e.target.value.toLowerCase();const list=catalogWorks.filter(({a})=>(a.title+' '+a.subtitle).toLowerCase().includes(q));$('#catalog').innerHTML=cards(list);$('#search-count').textContent=`${list.length} ${list.length===1?"work":"works"} found`;wireCards();};}}
 function map(){modal(`<div class="list-panel"><div class="caption">FIND YOUR WAY</div><h2 class="panel-title">Explore Serengeti</h2><p>Drag the joystick to walk and swipe the room to look on your phone or tablet. Use WASD on a keyboard. Run with Shift, jump with Space, or use the Run and Jump buttons. Choose a destination below to teleport.</p><div class="map-destinations">${[['Atrium','The living portrait, chess table & gathering space','tree'],['Exhibition halls','The established collection · 33 works','image'],['Cinema','Jazz-club screenings, films & streams','film-strip'],['Life & Light','21 supplied works · photography & abstract art','sun']].map(([name,desc,icon],i)=>`<button data-destination="${i}"><i class="ph-light ph-${icon}" aria-hidden="true"></i><span><strong>${name}</strong><small>${desc}</small></span></button>`).join('')}</div></div>`);document.querySelectorAll('[data-destination]').forEach(b=>b.onclick=()=>{close();world.go(Number(b.dataset.destination));});}

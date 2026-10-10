@@ -9,9 +9,9 @@ export class RoomVoice {
    if(!this.room.connected)throw Error('Join a room before turning on voice.');
    if(!this.Peer||!this.media?.getUserMedia)throw Error('Voice needs a supported browser and HTTPS. Text chat is available.');
    const stream=await this.media.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});
-   if(epoch!==this.epoch){stream.getTracks().forEach(t=>t.stop());return;}
+   if(epoch!==this.epoch||!this.room.connected){stream.getTracks().forEach(t=>t.stop());if(epoch===this.epoch)this.status('The room disconnected. Rejoin before turning on voice.');return;}
    this.stream=stream;this.muted=false;await this.room.update({voice:true});this.sync();
-  }catch(error){this.status(error.name==='NotAllowedError'?'Microphone permission was not granted. You can use text chat.':error.name==='NotFoundError'?'No microphone found. You can use text chat.':error.message);}finally{this.starting=false;}
+  }catch(error){if(epoch===this.epoch){this.stream?.getTracks().forEach(t=>t.stop());this.stream=null;this.muted=false;await this.room.update({voice:false}).catch(()=>{});this.status(error.name==='NotAllowedError'?'Microphone permission was not granted. You can use text chat.':error.name==='NotFoundError'?'No microphone found. You can use text chat.':error.message);}}finally{this.starting=false;}
  }
  mute(){if(!this.stream)return;this.muted=!this.muted;this.stream.getAudioTracks().forEach(t=>t.enabled=!this.muted);this.summary();}
  summary(){const live=[...this.peers.values()].filter(p=>p.pc.connectionState==='connected').length;this.status(!this.stream?'Voice off':this.muted?'Microphone muted':live?`Voice connected · ${live} ${live===1?'person':'people'}`:'Microphone on · waiting for a voice connection');}

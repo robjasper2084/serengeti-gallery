@@ -22,3 +22,9 @@ test('denied microphone permission leaves text room connected and voice off',asy
 test('leaving while a microphone request is pending stops the eventual stream',async()=>{
  const f=fixture();let resolve;f.voice.media={getUserMedia:()=>new Promise(r=>resolve=r)};const pending=f.voice.start();await f.voice.stop();resolve({getTracks:()=>[f.track],getAudioTracks:()=>[f.track]});await pending;assert.equal(f.track.stopped,true);assert.equal(f.voice.stream,null);
 });
+test('disconnecting while microphone permission is pending releases the eventual microphone',async()=>{
+ const f=fixture();let resolve;f.voice.media={getUserMedia:()=>new Promise(r=>resolve=r)};const pending=f.voice.start();f.room.connected=false;resolve({getTracks:()=>[f.track],getAudioTracks:()=>[f.track]});await pending;assert.equal(f.track.stopped,true);assert.equal(f.voice.stream,null);
+});
+test('a failed room update releases the microphone and permits a retry',async()=>{
+ const f=fixture();f.room.update=async()=>{throw Error('Disconnected');};await f.voice.start();assert.equal(f.track.stopped,true);assert.equal(f.voice.stream,null);assert.equal(f.voice.starting,false);
+});

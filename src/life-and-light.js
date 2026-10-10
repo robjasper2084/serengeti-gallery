@@ -1,5 +1,6 @@
 import works from './life-and-light.json';
 import {printEditions,printCheckout} from './print-editions.js';
+import {editionPrices} from './artwork-pricing.js';
 import './life-and-light.css';
 
 export const exhibitionGroups=[
@@ -14,7 +15,7 @@ export const exhibitionBanner=()=>`<button class="exhibition-banner" data-exhibi
 
 export function attachLifeAndLight({modal,close,showArt,artworks,world}){
  const byId=new Map(artworks.map((a,i)=>[a.id,i]));
- const card=w=>`<button class="exhibition-card" data-exhibition-art="${byId.get(w.id)}"><span class="exhibition-image"><img src="${w.image}" width="${w.width}" height="${w.height}" loading="lazy" alt="${esc(w.description)}"></span><span class="exhibition-card-copy"><strong>${esc(w.title)}</strong><small>${esc(w.credit)}</small><span>View artwork ↗</span></span></button>`;
+ const card=w=>`<button class="exhibition-card" data-exhibition-art="${byId.get(w.id)}"><span class="exhibition-image"><img src="${w.image}" width="${w.width}" height="${w.height}" loading="lazy" alt="${esc(w.description)}"></span><span class="exhibition-card-copy"><strong>${esc(w.title)}</strong><small>${esc(w.credit)}</small><span class="artwork-card-price">${editionPrices(w)}</span><span>View artwork ↗</span></span></button>`;
  let checkoutConfiguration=null;
  function bind(){
   document.querySelectorAll('[data-exhibition-art]').forEach(b=>b.onclick=()=>showArt(Number(b.dataset.exhibitionArt)));

@@ -201,5 +201,12 @@
     "url": "https://robjasper2084.github.io/serengeti-gallery/?artwork=life-light-yellow-current",
     "png": "/serengeti-gallery/assets/artwork-codes/life-light-yellow-current.png",
     "svg": "/serengeti-gallery/assets/artwork-codes/life-light-yellow-current.svg"
+  },
+  {
+    "id": "submitted-paradise-valley",
+    "title": "Paradise Valley",
+    "url": "https://robjasper2084.github.io/serengeti-gallery/?artwork=submitted-paradise-valley",
+    "png": "/serengeti-gallery/assets/artwork-codes/submitted-paradise-valley.png",
+    "svg": "/serengeti-gallery/assets/artwork-codes/submitted-paradise-valley.svg"
   }
 ]

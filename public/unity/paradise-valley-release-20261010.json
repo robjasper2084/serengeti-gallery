@@ -1,0 +1,13 @@
+{
+  "loaderUrl": "/serengeti-gallery/unity/Build/ParadiseValleyRelease.loader.js",
+  "config": {
+    "dataUrl": "/serengeti-gallery/unity/Build/ParadiseValleyRelease.data.unityweb",
+    "frameworkUrl": "/serengeti-gallery/unity/Build/ParadiseValleyRelease.framework.js.unityweb",
+    "codeUrl": "/serengeti-gallery/unity/Build/ParadiseValleyRelease.wasm.unityweb",
+    "streamingAssetsUrl": "/serengeti-gallery/unity/StreamingAssets"
+  },
+  "artworkCount": 55,
+  "exhibitionWorks": 21,
+  "contentVersion": "paradise-valley-release-20261010",
+  "downloadBytes": 67717207
+}
