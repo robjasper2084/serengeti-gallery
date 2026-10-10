@@ -1,0 +1,28 @@
+@property --aura-turn{syntax:'<angle>';inherits:false;initial-value:0deg}
+.hero.hero-movable{isolation:isolate;overflow:visible}
+.hero-float-bar{display:flex;align-items:center;justify-content:space-between;min-height:32px;margin:-6px 0 8px;gap:12px}
+.hero-float-bar button{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 0;font:10px/1 Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;color:#bda37a}
+.hero-float-bar i{font-size:15px}
+.hero-float-bar .hero-move{cursor:grab;touch-action:none}
+.hero-float-bar .hero-reset{letter-spacing:.6px}
+.hero-float-bar .hero-reset[hidden]{display:none}
+.hero.hero-movable h1{cursor:grab;touch-action:none}
+#responsive-arrival>.hero.hero-movable .round-button{top:59px!important}
+body:not(.exploring) #responsive-arrival>.hero.hero-floating{position:fixed!important;inset:auto!important;left:var(--float-left)!important;top:var(--float-top)!important;width:var(--float-width)!important;max-width:none!important;margin:0!important;z-index:12}
+.hero.hero-movable::before{content:'';position:absolute;inset:-24px;padding:22px;border-radius:27px;pointer-events:none;z-index:-1;background:conic-gradient(from calc(var(--aura-angle,0deg) + var(--aura-turn)),transparent 0deg,#ba87384d 35deg,#ffdd76eb 78deg,#ffd697c4 105deg,#d9979d8f 136deg,#c8b3e29f 158deg,#b3d9c37a 182deg,#d6c472bf 204deg,#ffdd76e0 244deg,#bb8a3c40 282deg,transparent 320deg);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;filter:blur(7px);opacity:var(--float-glow,0);transition:opacity .65s ease}
+.hero.hero-movable::after{content:'';position:absolute;inset:-13px;pointer-events:none;border-radius:17px;z-index:-1;box-shadow:0 0 30px 8px #eabc5255,0 0 68px 16px #dba35025;opacity:var(--float-glow,0);transition:opacity .65s ease}
+.hero.is-moving::before{animation:hero-aura-orbit 2.8s linear infinite}
+.hero.is-dragging,.hero.is-dragging h1,.hero.is-dragging .hero-move{cursor:grabbing;user-select:none}
+.hero.float-still::before,.hero.float-still::after{display:none}
+@keyframes hero-aura-orbit{to{--aura-turn:360deg}}
+@media(max-height:500px){
+ body:not(.exploring) #responsive-arrival>.hero.hero-floating{padding:12px}
+ body:not(.exploring) #responsive-arrival>.hero.hero-floating .hero-float-bar{min-height:28px;margin-bottom:5px}
+ body:not(.exploring) #responsive-arrival>.hero.hero-floating h1{font-size:24px;margin-bottom:6px}
+ body:not(.exploring) #responsive-arrival>.hero.hero-floating .arrival-description{font-size:12px;line-height:1.45;margin-top:4px}
+ body:not(.exploring) #responsive-arrival>.hero.hero-floating #discover-story{margin-top:8px;min-height:44px}
+ body:not(.exploring) #responsive-arrival>.hero.hero-floating .lobby-options{margin-top:7px}
+ body:not(.exploring) #responsive-arrival>.hero.hero-floating .lobby-options select{min-height:36px}
+ #responsive-arrival>.hero.hero-floating .round-button{top:42px!important}
+}
+@media(prefers-reduced-motion:reduce){.hero.hero-movable::before,.hero.hero-movable::after{display:none}}

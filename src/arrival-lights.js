@@ -45,12 +45,39 @@ const fixtures=[
  ['portrait-wall',[[445,696],[489,687],[447,905],[413,915]],30,true],
 ];
 
+// Light pools spread onto the surrounding stone, leaves and polished floor.
+// They sit at photographed bulbs/uplights, rather than on the portrait itself.
+const pools=[
+ ['portrait-top',138,18,50,.65],['portrait-frame',383,119,32,1.4],
+ ['portrait-wall',329,668,58,1.8],['window-column',515,435,38,.55],
+ ['gallery-ceiling',945,453,35,1.3],['gallery-wall',1099,390,48,.6],
+ ['gallery-base',1113,688,60,1.15],['cinema-canopy',1200,306,42,1.5],
+ ['cinema-roof',1126,241,32,1.4],['balcony',1162,23,30,1.2],
+ ['atrium-stairs',594,636,38,1.4],['cinema-stairs',1277,650,38,1.4],
+ ['cinema-lamp',1223,548,42,1],['gallery-lamp',943,555,40,1],
+ ['tree-left',655,600,76,1.2],['tree-right',829,587,68,1.2],
+ ['planter-uplight',970,695,86,1.1],['left-bench',49,787,65,1.9],
+ ['right-bench',1439,750,70,1.8],['front-planter',1083,981,58,1.7],
+ ['atrium-stairs',550,822,37,.55,true],['gallery-base',1147,764,38,.65,true],
+ ['planter-uplight',980,797,42,.7,true],['right-bench',1250,774,42,1.15,true],
+ ['left-bench',87,860,45,1.1,true],['portrait-wall',449,805,38,.6,true],
+];
+const beams=[
+ ['portrait-top',[135,28],[111,229],38],
+ ['tree-left',[655,599],[709,414],48],
+ ['tree-right',[829,585],[789,451],42],
+ ['planter-uplight',[970,694],[952,594],35],
+ ['gallery-lamp',[943,555],[948,612],27],
+ ['cinema-lamp',[1223,548],[1231,603],27],
+];
+const lightEnergy=(t,phase)=>.5+.36*Math.sin(t*1.18+phase)+.1*Math.sin(t*.63+phase*2);
+
 export function attachArrivalLights(){
  const arrival=document.querySelector('#arrival'),image=document.querySelector('#atrium-image');
  const canvas=document.createElement('canvas');canvas.id='arrival-lights';canvas.width=768;canvas.height=512;canvas.setAttribute('aria-hidden','true');arrival.append(canvas);
  const context=canvas.getContext('2d');if(!context){canvas.remove();return;}
  const motion=matchMedia('(prefers-reduced-motion: reduce)');
- let layers=[],frame=0,last=0,visible=true,ready=false,disposed=false,frames=0;
+ let layers=[],phases=new Map(),frame=0,last=0,visible=true,ready=false,disposed=false,frames=0;
  const reduced=()=>readSaved('serengeti-reduced-motion',motion.matches)===true;
  const active=()=>ready&&!disposed&&visible&&!document.hidden&&!reduced()&&!document.body.classList.contains('exploring')&&!document.querySelector('#modal').open;
  function fit(){const {scale,x,y}=fitArrivalPhoto(arrival.clientWidth,arrival.clientHeight,getComputedStyle(image));canvas.style.transform=`translate(${x}px,${y}px) scale(${scale})`;}
@@ -62,7 +89,7 @@ export function attachArrivalLights(){
     const t=time/1000,phase=layer.phase;
     // A gradual five-second light cycle with an independent secondary drift.
     // Every floor reflection follows the fixture that produces it.
-    const energy=.5+.36*Math.sin(t*1.18+phase)+.1*Math.sin(t*.63+phase*2);
+    const energy=lightEnergy(t,phase);
     context.globalCompositeOperation='source-over';
     context.globalAlpha=(1-energy)*(layer.reflection ? .24 : .38);
     context.drawImage(layer.shade,layer.x,layer.y);
@@ -73,6 +100,23 @@ export function attachArrivalLights(){
     context.globalAlpha=energy*(layer.reflection ? .75 : 1);
     context.drawImage(layer.bloom,layer.x+shimmer*.5,layer.y);
     context.globalAlpha=energy*.65;context.drawImage(layer.core,layer.x,layer.y);
+   }
+   const t=time/1000;context.globalCompositeOperation='screen';
+   for(const [name,x,y,radius,aspect,reflection=false]of pools){
+    const phase=phases.get(name),energy=lightEnergy(t,phase);
+    const spread=radius*(.65+energy*.55),drift=reflection?Math.sin(t*1.5+phase)*5:0;
+    context.save();context.translate(x+drift,y);context.scale(aspect,reflection?1.65:1);
+    const gradient=context.createRadialGradient(0,0,0,0,0,spread);
+    gradient.addColorStop(0,'rgba(255,241,208,.92)');gradient.addColorStop(.13,'rgba(255,216,141,.7)');
+    gradient.addColorStop(.4,'rgba(243,179,78,.38)');gradient.addColorStop(1,'rgba(225,151,45,0)');
+    context.globalAlpha=(reflection?.42:.66)*energy;context.fillStyle=gradient;context.fillRect(-spread,-spread,spread*2,spread*2);context.restore();
+   }
+   context.filter='blur(8px)';
+   for(const [name,start,end,width]of beams){
+    const phase=phases.get(name),energy=lightEnergy(t,phase),sway=Math.sin(t*.7+phase)*5;
+    const [x,y]=start,[ex,ey]=end;const gradient=context.createLinearGradient(x,y,ex+sway,ey);
+    gradient.addColorStop(0,'rgba(255,227,166,.7)');gradient.addColorStop(.3,'rgba(251,199,106,.3)');gradient.addColorStop(1,'rgba(232,165,66,0)');
+    context.globalAlpha=energy*.42;context.fillStyle=gradient;context.beginPath();context.moveTo(x-2,y);context.lineTo(ex+sway-width,ey);context.lineTo(ex+sway+width,ey);context.lineTo(x+2,y);context.closePath();context.fill();
    }
    context.restore();canvas.dataset.frames=String(++frames);
   }
@@ -91,7 +135,7 @@ export function attachArrivalLights(){
    const m=mask.getContext('2d',{willReadFrequently:true});m.drawImage(image,0,0,1536,1024);const pixels=m.getImageData(0,0,1536,1024);
    for(let i=0;i<pixels.data.length;i+=4){const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2];pixels.data[i+3]=255*Math.max(0,Math.min(1,(r-145)/85))*Math.max(0,Math.min(1,(r-b-15)/75))*(g>70?1:0);}
    m.putImageData(pixels,0,0);
-   const phases=new Map();
+   phases=new Map();
    layers=fixtures.map(([name,points,width,reflection=false])=>{
     if(!phases.has(name))phases.set(name,phases.size*2.399);
     const pad=width+80,x=Math.max(0,Math.floor(Math.min(...points.map(p=>p[0]))-pad)),y=Math.max(0,Math.floor(Math.min(...points.map(p=>p[1]))-pad));
@@ -107,7 +151,7 @@ export function attachArrivalLights(){
     hctx.filter=`blur(${reflection?18:26}px) brightness(1.75)`;hctx.drawImage(core,0,0);
     return {x,y,core,shade,bloom,halo,reflection,phase:phases.get(name)};
    });
-   ready=true;canvas.dataset.version='visible-glow-2';canvas.dataset.fixtures=String(fixtures.filter(f=>!f[3]).length);canvas.dataset.reflections=String(fixtures.filter(f=>f[3]).length);fit();sync();
+   ready=true;canvas.dataset.version='light-pools-3';canvas.dataset.pools=String(pools.length);canvas.dataset.beams=String(beams.length);canvas.dataset.fixtures=String(fixtures.filter(f=>!f[3]).length);canvas.dataset.reflections=String(fixtures.filter(f=>f[3]).length);fit();sync();
   }catch{canvas.remove();disposed=true;}
  }
  new ResizeObserver(fit).observe(arrival);

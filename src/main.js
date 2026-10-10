@@ -1,5 +1,6 @@
 import {createCinemaTeaser} from './cinema-teaser.js';
 import {attachArrivalLights} from './arrival-lights.js';
+import {attachFloatingHero} from './floating-hero.js';
 import {createPassport} from './passport.js';
 import {createCloudPassport} from './cloud-passport.js';
 import {attachHTMLCinema} from './html-cinema.js';
@@ -18,6 +19,8 @@ import './first-visit.css';
 import './arrival-bubbles.css';
 import './visit-polish.css';
 import './lobby-layout.css';
+import './cinema-visit.css';
+import './floating-hero.css';
 import {attachLazyChess} from './lazy-chess.js';
 import {attachGalleryAudio} from './gallery-audio.js';
 import {attachTogether} from './together.js';
@@ -157,7 +160,7 @@ if(savedAccount||/[#&](access_token|error|type)=|[?&]code=/.test(location.href))
 
 function openCinema(){
  if(document.body.classList.contains('exploring')){world.go(2);return;}
- modal('<div class="list-panel"><div class="caption">YOUR CINEMA VISIT</div><h2>How would you like to watch?</h2><p>Watch a film right away, or walk into the 3D cinema with the curator.</p><div class="map-destinations"><button id="cinema-watch-now"><i class="ph-light ph-play" aria-hidden="true"></i><span><strong>Watch a film</strong><small>Quick to open · no 3D download</small></span></button><button id="cinema-explore"><i class="ph-light ph-person-simple-walk" aria-hidden="true"></i><span><strong>Enter the 3D cinema</strong><small>Choose a chair and explore</small></span></button></div></div>');
+ modal(`<section class="cinema-visit" aria-labelledby="cinema-visit-title"><div class="cinema-visit-scene" aria-hidden="true"><div><span>SERENGETI / AFTER DARK</span><strong>The cinema</strong></div></div><div class="cinema-visit-copy"><div class="caption">YOUR CINEMA VISIT</div><h2 id="cinema-visit-title">How would you<br>like to watch?</h2><p>Watch a film right away, or step inside and find your seat.</p><div class="cinema-visit-choices"><button id="cinema-watch-now" class="cinema-choice cinema-choice-primary"><i class="ph-light ph-play" aria-hidden="true"></i><span><strong>Watch a film</strong><small>Settle in for a screening</small></span><i class="ph-light ph-arrow-up-right cinema-choice-arrow" aria-hidden="true"></i></button><button id="cinema-explore" class="cinema-choice"><i class="ph-light ph-person-simple-walk" aria-hidden="true"></i><span><strong>Enter the 3D cinema</strong><small>Choose a chair and explore</small></span><i class="ph-light ph-arrow-up-right cinema-choice-arrow" aria-hidden="true"></i></button></div><div class="cinema-visit-signature">Art. Jazz. Detroit.</div></div></section>`);
  $('#cinema-watch-now').onclick=()=>htmlCinema.open();$('#cinema-explore').onclick=()=>{close();world.go(2);};
 }
 $('#watch').onclick=$('#cinema-nav').onclick=openCinema;
@@ -167,6 +170,7 @@ attachArrivalInteractions({enterGallery:()=>world.arrive()});
 attachResponsiveGallery();
 attachArrivalLights();
 attachGalleryHUD({modal,pause:()=>world.stop(),resume:()=>runtime?.resume(),onHelp:()=>tutorial.open()});
+attachFloatingHero();
 galleryAudio.sync();
 
 const linkedArtwork=linkedArtworkIndex(location.search,artworks);
