@@ -1,0 +1,66 @@
+/* A quiet moving photograph and warm light, shared by the three visit panels. */
+#modal:has(.ambient-panel){width:min(980px,calc(100% - 32px));max-width:980px;max-height:calc(100dvh - 40px);overflow:hidden;isolation:isolate;border:1px solid #b08b51;border-radius:10px;background:#15140f;box-shadow:0 32px 100px #000b}
+#modal:has(.ambient-panel)::before,#modal:has(.ambient-panel)::after{content:'';position:absolute;inset:-30px;pointer-events:none;z-index:-1}
+#modal:has(.ambient-panel)::before{background:linear-gradient(120deg,#15140fd6,#15140fe8),url('/assets/atrium-cinematic.webp') center / cover;transform:scale(1.04)}
+#modal:has(.ambient-panel)::after{background:radial-gradient(ellipse at 12% 28%,#d5a45126,transparent 48%),radial-gradient(ellipse at 88% 80%,#a775281c,transparent 44%)}
+#modal[open]:has(.ambient-panel)::before{animation:panel-scene-drift 24s ease-in-out infinite alternate}
+#modal[open]:has(.ambient-panel)::after{animation:panel-light-drift 16s ease-in-out infinite alternate}
+#modal[data-atmosphere='still']:has(.ambient-panel)::before,#modal[data-atmosphere='still']:has(.ambient-panel)::after{animation:none}
+#modal[data-atmosphere='paused']:has(.ambient-panel)::before,#modal[data-atmosphere='paused']:has(.ambient-panel)::after{animation-play-state:paused}
+#modal:has(.ambient-panel) #modal-content{max-height:calc(100dvh - 42px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9a7742 #1c1a13}
+#modal:has(.ambient-panel) #modal-content::-webkit-scrollbar{width:7px}
+#modal:has(.ambient-panel) #modal-content::-webkit-scrollbar-track{background:#1c1a13}
+#modal:has(.ambient-panel) #modal-content::-webkit-scrollbar-thumb{background:#9a7742;border-radius:8px;border:2px solid #1c1a13}
+#modal:has(.ambient-panel) .close{position:absolute;top:12px;right:12px;margin:0;z-index:6;width:40px;height:40px;display:grid;place-items:center;border:1px solid #ab895c55;background:#15140fed;color:#e5c898}
+#modal:has(.ambient-panel) .modal-friends{position:absolute;top:16px;bottom:auto;left:20px;z-index:5;margin:0;min-height:40px;padding:10px 13px;background:#19170de6;border-color:#a3835680;color:#e4c698;font-size:11px}
+#modal:has(.collection-panel,.explore-panel){padding-top:64px}
+#modal:has(.collection-panel,.explore-panel) #modal-content{max-height:calc(100dvh - 106px)}
+.collection-panel,.explore-panel{padding:12px 34px 34px;background:transparent}
+.ambient-panel .caption{color:#c8a46b;font-size:9px;letter-spacing:2.3px}
+.panel-scene{padding:28px 30px;margin-bottom:26px;min-height:170px;box-sizing:border-box;border:1px solid #b08b5140;border-radius:6px;background:linear-gradient(90deg,#15140ff7 15%,#15140f90 70%,#15140f30),url('/assets/atrium-cinematic.webp') 80% 45% / cover}
+.panel-scene .panel-title{color:#f0dfbf;font:42px/1.1 Georgia,serif;font-weight:400;letter-spacing:-.8px;margin:14px 0 12px}
+.panel-scene p{margin:0;color:#c8bba2;font-size:13px}
+.collection-panel .exhibition-banner{margin:0 0 24px;padding:18px;background:linear-gradient(120deg,#362d1bbb,#201c15e6);border-color:#b08b5166;border-radius:6px;gap:22px;color:#eedabb}
+.collection-panel .exhibition-banner img{width:145px;height:110px;border-radius:3px}
+.collection-panel .exhibition-banner strong{font:27px/1.15 Georgia,serif;font-weight:400}
+.collection-panel .exhibition-banner>span>span{color:#bcaf96}
+.collection-panel .search-count{padding:0 0 16px;margin:0 0 22px;border-bottom:1px solid #b08b5138;color:#c5ae89;letter-spacing:.7px}
+.collection-panel .search-field{margin:0 0 22px;padding:14px 16px;border:1px solid #a3835666;border-radius:5px;background:#17150ebf;color:#d7b987}
+.collection-panel .search-field input{font-size:15px;min-width:0;width:100%;color:#f0dfbf}
+.collection-panel .catalog{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 18px}
+.collection-panel .catalog button{min-width:0;padding:10px 10px 18px;border:1px solid #a3835645;border-radius:5px;background:#17150dc9;transition:border-color .2s,background .2s}
+.collection-panel .catalog button:hover{border-color:#d3b07a;background:#2b2418e6}
+.collection-panel .catalog button:focus-visible,.explore-panel .map-destinations button:focus-visible{outline:2px solid #e6c68a;outline-offset:3px}
+.collection-panel .catalog img{height:190px;object-fit:contain;background:#0e0e0b;border-radius:2px}
+.collection-panel .catalog h3{font:21px/1.25 Georgia,serif;font-weight:400;color:#efddbb;margin:17px 4px 12px}
+.collection-panel .catalog .artwork-card-price{font-size:12px;color:#d9b887;margin:10px 4px;line-height:1.6}
+.collection-panel .catalog small{display:block;margin:0 4px;color:#c9aa76;font-size:10px}
+.explore-panel>p{color:#bcaf96;margin:0 0 24px;max-width:76ch;font-size:13px;line-height:1.8}
+.explore-panel .map-destinations{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.explore-panel .map-destinations button{display:flex;align-items:center;gap:18px;min-width:0;min-height:115px;margin:0;padding:24px 20px;text-align:left;border:1px solid #98734480;border-radius:6px;background:linear-gradient(120deg,#342b1cc4,#211d15cc);color:#e8d0a7;transition:background .2s,border-color .2s}
+.explore-panel .map-destinations button:hover{background:#3a2e1de6;border-color:#d3b07a}
+.explore-panel .map-destinations i{font-size:30px;color:#d3b07a;flex:none}
+.explore-panel .map-destinations strong{display:block;font:25px/1.2 Georgia,serif;font-weight:400}
+.explore-panel .map-destinations small{display:block;margin-top:8px;font:11px/1.6 Arial,sans-serif;color:#baa88b}
+#modal:has(.cinema-visit){width:min(900px,calc(100% - 32px))}
+.cinema-visit-copy{background:linear-gradient(120deg,#15140fd9,#15140f85)}
+@keyframes panel-scene-drift{from{transform:scale(1.04) translate(-12px,-5px)}to{transform:scale(1.1) translate(12px,5px)}}
+@keyframes panel-light-drift{from{transform:translate(-26px,-12px) rotate(-6deg)}to{transform:translate(26px,12px) rotate(6deg)}}
+@media(max-width:750px){.collection-panel .catalog{grid-template-columns:repeat(2,minmax(0,1fr))}.collection-panel .catalog img{height:185px}.explore-panel .map-destinations{grid-template-columns:1fr}.explore-panel .map-destinations button{min-height:92px}}
+@media(max-width:520px){
+ #modal:has(.ambient-panel){width:calc(100% - 20px);max-height:calc(100dvh - 24px)}
+ #modal:has(.ambient-panel) #modal-content{max-height:calc(100dvh - 26px)}
+ #modal:has(.collection-panel,.explore-panel) #modal-content{max-height:calc(100dvh - 90px)}
+ .collection-panel,.explore-panel{padding:8px 18px 24px}
+ .panel-scene{padding:24px 20px;min-height:155px;background-position:72% center;margin-bottom:20px}
+ .panel-scene .panel-title{font-size:33px}
+ .panel-scene .caption{font-size:8px;letter-spacing:1.4px}
+ .collection-panel .exhibition-banner{flex-direction:column;align-items:stretch;padding:14px;gap:16px}
+ .collection-panel .exhibition-banner img{width:100%;height:130px}
+ .collection-panel .exhibition-banner strong{font-size:25px}
+ .collection-panel .catalog{grid-template-columns:1fr;gap:18px}
+ .collection-panel .catalog img{height:240px}
+ .explore-panel .map-destinations button{padding:20px 16px;gap:16px}
+ .explore-panel .map-destinations strong{font-size:23px}
+}
+@media(prefers-reduced-motion:reduce){#modal:has(.ambient-panel)::before,#modal:has(.ambient-panel)::after{animation:none!important}.collection-panel .catalog button,.explore-panel .map-destinations button{transition:none}}
