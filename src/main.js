@@ -58,7 +58,6 @@ for(const work of artworks){work.displayOnly=true;}
 artworks.push(...lifeAndLightWorks);
 artworks.push(...newWorks);
 restoreSubmittedPrices([...submittedWorks,...lifeAndLightWorks,...newWorks]);
-const portraitPrices=document.createElement('button');portraitPrices.id='portrait-prices';portraitPrices.className='portrait-prices';portraitPrices.textContent=editionPrices(artworks[0])+' ↗';portraitPrices.setAttribute('aria-label','View The Living Portrait prices');document.querySelector('.hero h1').after(portraitPrices);portraitPrices.onclick=()=>showArt(0);
 artworks[0].subtitle='Supplied portrait · exhibition reference';
 artworks[0].note='Supplied reference for this prototype. No sale or biography is implied.';
 const passportStorage={getItem:k=>localStorage.getItem(k),setItem:(k,v)=>localStorage.setItem(k,v)};

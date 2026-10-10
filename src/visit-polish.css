@@ -1,7 +1,6 @@
 /* Keep the photographic arrival, with one clear invitation and shared sound controls. */
 .hero .arrival-description{font-size:14px;line-height:1.55;letter-spacing:0;color:#e1d4bc;max-width:32ch;margin-top:12px}
-.hero .portrait-prices{display:block;color:#e1c591;font-size:13px;line-height:1.5;text-align:left;min-height:32px;padding:4px 0;margin:4px 0 8px;text-decoration:underline;text-underline-offset:4px}
-.hero:has(.portrait-prices){height:auto}
+.hero{height:auto}
 .hero #discover-story{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;max-width:300px;min-height:56px;height:auto;background:#d4b47c;border-color:#e4c791;color:#192019;font-weight:600;font-size:17px;border-radius:10px;box-shadow:0 4px 18px #0003}
 .hero #discover-story:hover{background:#ebcf9b}
 .hero #discover-story:after{content:'↗';font-size:22px}
