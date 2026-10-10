@@ -70,7 +70,8 @@ const beams=[
  ['gallery-lamp',[943,555],[948,612],27],
  ['cinema-lamp',[1223,548],[1231,603],27],
 ];
-const lightEnergy=(t,phase)=>.5+.36*Math.sin(t*1.18+phase)+.1*Math.sin(t*.63+phase*2);
+// Slow changes around a steady warm level; no pronounced flicker or flashing.
+const lightEnergy=(t,phase)=>.68+.11*Math.sin(t*.46+phase)+.035*Math.sin(t*.83+phase*2);
 
 export function attachArrivalLights(){
  const arrival=document.querySelector('#arrival'),image=document.querySelector('#atrium-image');
@@ -87,19 +88,19 @@ export function attachArrivalLights(){
    last=time;context.clearRect(0,0,768,512);context.save();context.scale(.5,.5);
    for(const layer of layers){
     const t=time/1000,phase=layer.phase;
-    // A gradual five-second light cycle with an independent secondary drift.
+    // A gradual fourteen-second drift around the fixture's steady light level.
     // Every floor reflection follows the fixture that produces it.
     const energy=lightEnergy(t,phase);
     context.globalCompositeOperation='source-over';
-    context.globalAlpha=(1-energy)*(layer.reflection ? .24 : .38);
+    context.globalAlpha=(1-energy)*(layer.reflection ? .13 : .2);
     context.drawImage(layer.shade,layer.x,layer.y);
     context.globalCompositeOperation='screen';
     const shimmer=layer.reflection ? Math.sin(t*1.4+phase)*1.4 : 0;
-    context.globalAlpha=energy*(layer.reflection ? .65 : .95);
+    context.globalAlpha=energy*(layer.reflection ? .35 : .55);
     context.drawImage(layer.halo,layer.x+shimmer,layer.y);
-    context.globalAlpha=energy*(layer.reflection ? .75 : 1);
+    context.globalAlpha=energy*(layer.reflection ? .4 : .6);
     context.drawImage(layer.bloom,layer.x+shimmer*.5,layer.y);
-    context.globalAlpha=energy*.65;context.drawImage(layer.core,layer.x,layer.y);
+    context.globalAlpha=energy*.4;context.drawImage(layer.core,layer.x,layer.y);
    }
    const t=time/1000;context.globalCompositeOperation='screen';
    for(const [name,x,y,radius,aspect,reflection=false]of pools){
@@ -109,14 +110,14 @@ export function attachArrivalLights(){
     const gradient=context.createRadialGradient(0,0,0,0,0,spread);
     gradient.addColorStop(0,'rgba(255,241,208,.92)');gradient.addColorStop(.13,'rgba(255,216,141,.7)');
     gradient.addColorStop(.4,'rgba(243,179,78,.38)');gradient.addColorStop(1,'rgba(225,151,45,0)');
-    context.globalAlpha=(reflection?.42:.66)*energy;context.fillStyle=gradient;context.fillRect(-spread,-spread,spread*2,spread*2);context.restore();
+    context.globalAlpha=(reflection?.2:.32)*energy;context.fillStyle=gradient;context.fillRect(-spread,-spread,spread*2,spread*2);context.restore();
    }
    context.filter='blur(8px)';
    for(const [name,start,end,width]of beams){
     const phase=phases.get(name),energy=lightEnergy(t,phase),sway=Math.sin(t*.7+phase)*5;
     const [x,y]=start,[ex,ey]=end;const gradient=context.createLinearGradient(x,y,ex+sway,ey);
     gradient.addColorStop(0,'rgba(255,227,166,.7)');gradient.addColorStop(.3,'rgba(251,199,106,.3)');gradient.addColorStop(1,'rgba(232,165,66,0)');
-    context.globalAlpha=energy*.42;context.fillStyle=gradient;context.beginPath();context.moveTo(x-2,y);context.lineTo(ex+sway-width,ey);context.lineTo(ex+sway+width,ey);context.lineTo(x+2,y);context.closePath();context.fill();
+    context.globalAlpha=energy*.2;context.fillStyle=gradient;context.beginPath();context.moveTo(x-2,y);context.lineTo(ex+sway-width,ey);context.lineTo(ex+sway+width,ey);context.lineTo(x+2,y);context.closePath();context.fill();
    }
    context.restore();canvas.dataset.frames=String(++frames);
   }
@@ -151,7 +152,7 @@ export function attachArrivalLights(){
     hctx.filter=`blur(${reflection?18:26}px) brightness(1.75)`;hctx.drawImage(core,0,0);
     return {x,y,core,shade,bloom,halo,reflection,phase:phases.get(name)};
    });
-   ready=true;canvas.dataset.version='light-pools-3';canvas.dataset.pools=String(pools.length);canvas.dataset.beams=String(beams.length);canvas.dataset.fixtures=String(fixtures.filter(f=>!f[3]).length);canvas.dataset.reflections=String(fixtures.filter(f=>f[3]).length);fit();sync();
+   ready=true;canvas.dataset.version='soft-light-pools-4';canvas.dataset.pools=String(pools.length);canvas.dataset.beams=String(beams.length);canvas.dataset.fixtures=String(fixtures.filter(f=>!f[3]).length);canvas.dataset.reflections=String(fixtures.filter(f=>f[3]).length);fit();sync();
   }catch{canvas.remove();disposed=true;}
  }
  new ResizeObserver(fit).observe(arrival);

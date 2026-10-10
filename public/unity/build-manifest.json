@@ -1,9 +1,26 @@
 {
-  "loaderUrl": "/serengeti-gallery/unity/Build/ParadiseValleyRelease.loader.js",
+  "loaderUrl": "/serengeti-gallery/unity/Build/ParadiseValleyLowerWall.loader.js",
   "config": {
-    "dataUrl": "/serengeti-gallery/unity/Build/ParadiseValleyRelease.data.unityweb",
-    "frameworkUrl": "/serengeti-gallery/unity/Build/ParadiseValleyRelease.framework.js.unityweb",
-    "codeUrl": "/serengeti-gallery/unity/Build/ParadiseValleyRelease.wasm.unityweb",
+    "dataUrl": "/serengeti-gallery/unity/Build/ParadiseValleyLowerWall.data.unityweb",
+    "frameworkUrl": "/serengeti-gallery/unity/Build/ParadiseValleyLowerWall.framework.js.unityweb",
+    "codeUrl": "/serengeti-gallery/unity/Build/ParadiseValleyLowerWall.wasm.unityweb",
     "streamingAssetsUrl": "/serengeti-gallery/unity/StreamingAssets"
+  },
+  "artworkCount": 55,
+  "exhibitionWorks": 21,
+  "contentVersion": "paradise-valley-lower-wall-20261010",
+  "downloadBytes": 67722126,
+  "lowerWallArtwork": {
+    "id": "submitted-paradise-valley",
+    "index": 54,
+    "position": [
+      1.9,
+      2.5,
+      -24.69
+    ],
+    "width": 3.2,
+    "height": 1.7860465116279072,
+    "replacedIndex": 7,
+    "displacedArtworkRetained": true
   }
 }

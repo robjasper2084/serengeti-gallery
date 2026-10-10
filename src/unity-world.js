@@ -5,11 +5,11 @@ import {createCinemaPlayer} from './cinema-player.js';
 export async function createUnityGallery({artworks,onArt,onRoom,toast,chess,onProgress=()=>{}}) {
  const profile=qualityProfile(readSaved('serengeti-quality','auto'),matchMedia('(pointer: coarse)').matches);
  const canvas=document.querySelector('#world');canvas.tabIndex=0;
- const response=await fetch('/serengeti-gallery/unity/paradise-valley-release-20261010.json');if(!response.ok)throw Error('Unity build is not available');
+ const response=await fetch('/serengeti-gallery/unity/paradise-valley-lower-wall-20261010.json');if(!response.ok)throw Error('Unity build is not available');
  const manifest=await response.json();
  if(manifest.artworkCount!==artworks.length)throw Error('The native gallery and artwork catalog versions do not match');
  await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=manifest.loaderUrl;script.onload=resolve;script.onerror=()=>reject(Error('Unity loader failed'));document.head.appendChild(script);});
- const instance=await window.createUnityInstance(canvas,{...manifest.config,companyName:'Serengeti Gallery',productName:'Serengeti Gallery',productVersion:'1.4-prices-voice-20261010',matchWebGLToCanvasSize:true,devicePixelRatio:Math.min(devicePixelRatio,profile.ratio)},progress=>{onProgress(progress);});
+ const instance=await window.createUnityInstance(canvas,{...manifest.config,companyName:'Serengeti Gallery',productName:'Serengeti Gallery',productVersion:'1.5-lower-wall-20261010',matchWebGLToCanvasSize:true,devicePixelRatio:Math.min(devicePixelRatio,profile.ratio)},progress=>{onProgress(progress);});
  const readyProfile=qualityProfile(readSaved('serengeti-quality','auto'),matchMedia('(pointer: coarse)').matches);
  instance.Module.devicePixelRatio=Math.min(devicePixelRatio,readyProfile.ratio);
  instance.SendMessage('Playable portrait visitor','SetQuality',readyProfile.mode);
