@@ -1,2 +1,2 @@
-#arrival-lights{position:absolute;inset:0 auto auto 0;width:1536px;height:1024px;transform-origin:0 0;pointer-events:none;z-index:3;mix-blend-mode:screen}
+#arrival-lights{position:absolute;inset:0 auto auto 0;width:1536px;height:1024px;transform-origin:0 0;pointer-events:none;z-index:3}
 .exploring #arrival-lights{visibility:hidden}

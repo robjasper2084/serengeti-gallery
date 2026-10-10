@@ -4,6 +4,8 @@ import './arrival-lights.css';
 
 // Coordinates belong to the original 1536 × 1024 photograph. The luminance
 // mask lights only photographed warm highlights inside each fixture's shape.
+// Local shading and light spill make the change visible even when a source
+// highlight is already near white; adding more white alone cannot do that.
 const fixtures=[
  ['portrait-frame',[[154,56],[478,171],[482,645],[140,660],[146,49]],12],
  ['portrait-top',[[138,14],[126,35]],28],
@@ -58,10 +60,19 @@ export function attachArrivalLights(){
    last=time;context.clearRect(0,0,768,512);context.save();context.scale(.5,.5);
    for(const layer of layers){
     const t=time/1000,phase=layer.phase;
-    // Slow, independent changes in emitted light; its reflection shares phase.
-    const energy=.27+.09*Math.sin(t*.82+phase)+.035*Math.sin(t*1.67+phase*2);
-    context.globalAlpha=energy*(layer.reflection ? .75 : 1);context.drawImage(layer.bloom,layer.x,layer.y);
-    context.globalAlpha=energy*.48;context.drawImage(layer.core,layer.x,layer.y);
+    // A gradual five-second light cycle with an independent secondary drift.
+    // Every floor reflection follows the fixture that produces it.
+    const energy=.5+.36*Math.sin(t*1.18+phase)+.1*Math.sin(t*.63+phase*2);
+    context.globalCompositeOperation='source-over';
+    context.globalAlpha=(1-energy)*(layer.reflection ? .24 : .38);
+    context.drawImage(layer.shade,layer.x,layer.y);
+    context.globalCompositeOperation='screen';
+    const shimmer=layer.reflection ? Math.sin(t*1.4+phase)*1.4 : 0;
+    context.globalAlpha=energy*(layer.reflection ? .65 : .95);
+    context.drawImage(layer.halo,layer.x+shimmer,layer.y);
+    context.globalAlpha=energy*(layer.reflection ? .75 : 1);
+    context.drawImage(layer.bloom,layer.x+shimmer*.5,layer.y);
+    context.globalAlpha=energy*.65;context.drawImage(layer.core,layer.x,layer.y);
    }
    context.restore();canvas.dataset.frames=String(++frames);
   }
@@ -83,15 +94,20 @@ export function attachArrivalLights(){
    const phases=new Map();
    layers=fixtures.map(([name,points,width,reflection=false])=>{
     if(!phases.has(name))phases.set(name,phases.size*2.399);
-    const pad=width+20,x=Math.max(0,Math.floor(Math.min(...points.map(p=>p[0]))-pad)),y=Math.max(0,Math.floor(Math.min(...points.map(p=>p[1]))-pad));
+    const pad=width+80,x=Math.max(0,Math.floor(Math.min(...points.map(p=>p[0]))-pad)),y=Math.max(0,Math.floor(Math.min(...points.map(p=>p[1]))-pad));
     const w=Math.min(1536-x,Math.ceil(Math.max(...points.map(p=>p[0]))+pad-x)),h=Math.min(1024-y,Math.ceil(Math.max(...points.map(p=>p[1]))+pad-y));
     const core=document.createElement('canvas');core.width=w;core.height=h;const c=core.getContext('2d');
     c.lineWidth=width;c.lineCap='round';c.lineJoin='round';c.strokeStyle='white';c.beginPath();points.forEach(([px,py],i)=>i?c.lineTo(px-x,py-y):c.moveTo(px-x,py-y));c.stroke();
     c.globalCompositeOperation='source-in';c.drawImage(mask,-x,-y);
-    const bloom=document.createElement('canvas');bloom.width=w;bloom.height=h;const b=bloom.getContext('2d');b.filter=`blur(${reflection?9:7}px)`;b.drawImage(core,0,0);
-    return {x,y,core,bloom,reflection,phase:phases.get(name)};
+    const shade=document.createElement('canvas');shade.width=w;shade.height=h;const s=shade.getContext('2d');
+    s.drawImage(core,0,0);s.globalCompositeOperation='source-in';s.fillStyle='#160d04';s.fillRect(0,0,w,h);
+    const bloom=document.createElement('canvas');bloom.width=w;bloom.height=h;const b=bloom.getContext('2d');
+    b.filter=`blur(${reflection?10:8}px) brightness(1.65)`;b.drawImage(core,0,0);
+    const halo=document.createElement('canvas');halo.width=w;halo.height=h;const hctx=halo.getContext('2d');
+    hctx.filter=`blur(${reflection?18:26}px) brightness(1.75)`;hctx.drawImage(core,0,0);
+    return {x,y,core,shade,bloom,halo,reflection,phase:phases.get(name)};
    });
-   ready=true;canvas.dataset.fixtures=String(fixtures.filter(f=>!f[3]).length);canvas.dataset.reflections=String(fixtures.filter(f=>f[3]).length);fit();sync();
+   ready=true;canvas.dataset.version='visible-glow-2';canvas.dataset.fixtures=String(fixtures.filter(f=>!f[3]).length);canvas.dataset.reflections=String(fixtures.filter(f=>f[3]).length);fit();sync();
   }catch{canvas.remove();disposed=true;}
  }
  new ResizeObserver(fit).observe(arrival);
